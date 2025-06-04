@@ -11,12 +11,13 @@ public class BackendApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(BackendApplication.class, args);
 	}
+
 	@RestController
 	static class HelloController {
 
 		@GetMapping("/hello")
 		public String hello() {
-			return "Hello, World! and all others";
+			return "Hello, World!";
 		}
 	}
 }

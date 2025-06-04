@@ -13,7 +13,7 @@ services:
     build: ./backend
     depends_on: [db]
     networks: [booking-net]
-    ports: ["8080:8080"]
+    ports: ["8082:8080"]
 
 #   frontend:
 #     build: ../frontend
