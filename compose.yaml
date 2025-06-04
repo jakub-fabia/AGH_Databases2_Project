@@ -1,0 +1,28 @@
+services:
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: booking
+      POSTGRES_USER: booking_user
+      POSTGRES_PASSWORD: secret
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks: [booking-net]
+    ports: ["5432:5432"]
+  backend:
+    build: ./backend
+    depends_on: [db]
+    networks: [booking-net]
+    ports: ["8080:8080"]
+
+#   frontend:
+#     build: ../frontend
+#     depends_on: [backend]
+#     networks: [booking-net]
+#     ports: ["3000:80"]
+
+networks:
+  booking-net:
+
+volumes:
+  db_data:
