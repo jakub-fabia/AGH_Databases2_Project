@@ -1,6 +1,12 @@
-# Work in progress!!!
+# Booking-like database system WIP!!!
+Hotel room reservation system, using Java Spring Boot and PostgreSQL.
 
-Komenda do zbierania danych z bazy do pliku sql:
+# Authors
+
+- [Jakub Fabia](https://github.com/jakub-fabia)
+- [Michał Gontarz](https://github.com/gontarsky04)
+
+# Komendy do bazy
 
 **Nazwa konteneru może się różnić, sprawdź za pomocą `mongo ps`**
 
