@@ -7,6 +7,7 @@ services:
       POSTGRES_PASSWORD: secret
     volumes:
       - db_data:/var/lib/postgresql/data
+      - ./database:/home
     networks: [booking-net]
     ports: ["5432:5432"]
   backend:
@@ -15,11 +16,11 @@ services:
     networks: [booking-net]
     ports: ["8082:8080"]
 
-#   frontend:
-#     build: ../frontend
-#     depends_on: [backend]
-#     networks: [booking-net]
-#     ports: ["3000:80"]
+  frontend:
+    build: ./frontend
+    depends_on: [backend]
+    networks: [booking-net]
+    ports: ["3000:80"]
 
 networks:
   booking-net:
