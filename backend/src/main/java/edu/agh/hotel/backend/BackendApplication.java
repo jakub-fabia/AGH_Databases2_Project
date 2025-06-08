@@ -17,7 +17,7 @@ public class BackendApplication {
 
 		@GetMapping("/hello")
 		public String hello() {
-			return "Hello, World!";
+			return "Hello, World edited 2!";
 		}
 	}
 }
