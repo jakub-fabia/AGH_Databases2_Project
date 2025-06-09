@@ -124,7 +124,6 @@ Kompletne definicje SQL znajdują się w pliku [`sql/tables_enums.sql`](./sql/
 | ---------------------------- | -------------------- | -------------------------- | ------------------------------ |
 | booking_id                   | SERIAL               | **PK**                     | Identyfikator zamówienia       |
 | guest_id                     | INT   **NOT NULL**   | FK → `guest`               |                                |
-| checkin_date / checkout_date | DATE **NOT NULL**    | CHECK checkout > checkin   | Data zameldowania/wymeldowania |
 | total_price                  | NUMERIC **NOT NULL** | total_price > 0            | Kwota za całe zamówienie       |
 | status                       | booking_status       | DEFAULT 'PENDING'          | Aktualny status rezerwacji     |
 | created_at                   | TIMESTAMPTZ          | DEFAULT now()              | Data utworzenia rezerwacji     |
@@ -137,12 +136,14 @@ Kompletne definicje SQL znajdują się w pliku [`sql/tables_enums.sql`](./sql/
 
 > Szczegóły rezerwacji — które pokoje wchodzą w skład jednego `booking` i z jakimi dodatkami.
 
-| Kolumna       | Typ     | Klucz / ograniczenia  | Znaczenie                             |
-| ------------- | ------- | --------------------- | ------------------------------------- |
-| booking_id    | INT     | **PK** fk → `booking` |                                       |
-| room_id       | INT     | **PK** fk → `room`    |                                       |
-| breakfast     | BOOLEAN | DEFAULT false         | Czy gość zamówił śniadanie            |
-| late_checkout | BOOLEAN | DEFAULT false         | Czy gość zamówił późne wykwaterowanie |
+| Kolumna       | Typ                  | Klucz / ograniczenia  | Znaczenie                             |
+| ------------- | -------------------- | --------------------- | ------------------------------------- |
+| booking_id    | INT                  | **PK** fk → `booking` |                                       |
+| room_id       | INT                  | **PK** fk → `room`    |                                       |
+| checkin_date  | DATE **NOT NULL**    | checkout > checkin    | Data zameldowania                     |
+| checkout_date | DATE **NOT NULL**    | checkout > checkin    | Data wymeldowania                     |
+| breakfast     | BOOLEAN **NOT NULL** | DEFAULT false         | Czy gość zamówił śniadanie            |
+| late_checkout | BOOLEAN **NOT NULL** | DEFAULT false         | Czy gość zamówił późne wykwaterowanie |
 
 ---
 
@@ -157,9 +158,8 @@ Kompletne definicje SQL znajdują się w pliku [`sql/tables_enums.sql`](./sql/
 | booking_log_id               | SERIAL         | **PK**                |                                                                          |
 | booking_id                   | INT            | FK → `booking`        |                                                                          |
 | created_at                   | TIMESTAMPTZ    | DEFAULT now()         |                                                                          |
-| checkin_date / checkout_date | DATE           |                       | Nowe daty zameldowania/wymeldowania                                      | 
 | status                       | booking_status |                       | Nowy status zamówienia                                                   |
-| booking_rooms                | JSONB          |                       | Nowe szczegóły zamówienia w formie `{room_id, breakfast, late_checkout}` |
+| booking_rooms                | JSONB          |                       | Nowe szczegóły zamówienia w formie `{room_id, checkin, checkout breakfast, late_checkout}` |
 
 ---
 
