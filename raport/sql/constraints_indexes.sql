@@ -1,11 +1,14 @@
 ALTER TABLE hotel
+  ADD UNIQUE(name, country, city, address),
   ADD UNIQUE(email),
   ADD UNIQUE(phone),
   ADD CHECK (stars IS NULL OR stars BETWEEN 1 AND 5),
-  ADD CHECK (review_score IS NULL OR review_score BETWEEN 0 AND 5),
-  ADD CHECK (checkin_time < checkout_time);
+  ADD CHECK (review_sum >= 0),
+  ADD CHECK (review_count >= 0),
+  ADD CHECK (checkin_time > checkout_time);
 
 ALTER TABLE room_type
+  ADD UNIQUE (name, capacity),
   ADD CHECK (capacity > 0);
 
 ALTER TABLE hotel_room_type

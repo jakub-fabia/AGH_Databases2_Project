@@ -1,18 +1,3 @@
-CREATE TYPE room_status AS ENUM (
-  'AVAILABLE',
-  'OCCUPIED',
-  'DIRTY',
-  'MAINTENANCE'
-);
-CREATE TYPE booking_status as ENUM (
-  'PENDING', 
-  'CONFIRMED', 
-  'CHECKED_IN', 
-  'CHECKED_OUT', 
-  'CANCELLED', 
-  'NO_SHOW'
-);
-
 CREATE TABLE hotel (
   hotel_id      SERIAL       PRIMARY KEY,
   name          VARCHAR(255) NOT NULL,
@@ -22,7 +7,8 @@ CREATE TABLE hotel (
   phone         VARCHAR(20)  NOT NULL,
   email         VARCHAR(255) NOT NULL,
   stars         SMALLINT,
-  review_score  NUMERIC(3,2),
+  review_sum    INT          NOT NULL DEFAULT 0,
+  review_count  INT          NOT NULL DEFAULT 0,
   checkin_time  TIME         NOT NULL,
   checkout_time TIME         NOT NULL
 );
@@ -48,7 +34,7 @@ CREATE TABLE room (
   hotel_id     INT         NOT NULL,
   type_id      INT         NOT NULL,
   room_number  VARCHAR(10) NOT NULL,
-  status       room_status NOT NULL DEFAULT 'AVAILABLE',
+  status       VARCHAR(11) NOT NULL DEFAULT 'AVAILABLE',
   FOREIGN KEY (hotel_id, type_id) REFERENCES hotel_room_type(hotel_id, type_id)
 );
 
@@ -56,7 +42,7 @@ CREATE TABLE room_log (
   room_log_id SERIAL         PRIMARY KEY,
   room_id     INT            NOT NULL REFERENCES room,
   created_at  TIMESTAMPTZ    NOT NULL DEFAULT now(),
-  status      room_status    NOT NULL
+  status      VARCHAR(11)    NOT NULL
 );
 
 CREATE TABLE guest (
@@ -76,7 +62,7 @@ CREATE TABLE booking (
   booking_id     SERIAL         PRIMARY KEY,
   guest_id       INT            NOT NULL REFERENCES guest,
   total_price    NUMERIC(10,2)  NOT NULL,
-  status         booking_status NOT NULL DEFAULT 'PENDING',
+  status         VARCHAR(11)    NOT NULL DEFAULT 'PENDING',
   created_at     TIMESTAMPTZ    NOT NULL DEFAULT now(),
   review         TEXT,
   review_rating  SMALLINT
@@ -98,7 +84,7 @@ CREATE TABLE booking_log (
   booking_log_id SERIAL         PRIMARY KEY,
   booking_id     INT            NOT NULL REFERENCES booking,
   created_at     TIMESTAMPTZ    NOT NULL DEFAULT now(),
-  status         booking_status NOT NULL,
+  status         VARCHAR(11)    NOT NULL,
   booking_rooms  JSONB          NOT NULL
 );
 
