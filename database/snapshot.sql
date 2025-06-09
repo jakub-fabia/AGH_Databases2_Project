@@ -32,34 +32,162 @@ COMMENT ON EXTENSION btree_gist IS 'support for indexing common datatypes in GiS
 
 
 --
--- Name: booking_status; Type: TYPE; Schema: public; Owner: booking_user
+-- Name: f_insert_booking_log(); Type: FUNCTION; Schema: public; Owner: booking_user
 --
 
-CREATE TYPE public.booking_status AS ENUM (
-    'PENDING',
-    'CONFIRMED',
-    'CHECKED_IN',
-    'CHECKED_OUT',
-    'CANCELLED',
-    'NO_SHOW'
-);
+CREATE FUNCTION public.f_insert_booking_log() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  b          booking;
+  rooms_json jsonb;
+BEGIN
+  SELECT * INTO b FROM booking WHERE booking_id = NEW.booking_id;
+
+  SELECT jsonb_agg(jsonb_build_object(
+           'room_id',       room_id,
+           'checkin_date',  checkin_date,
+           'checkout_date', checkout_date,
+           'breakfast',     breakfast,
+           'late_checkout', late_checkout))
+    INTO rooms_json
+  FROM booking_room
+  WHERE booking_id = NEW.booking_id;
+
+  INSERT INTO booking_log(booking_id, created_at, status, booking_rooms)
+  VALUES (b.booking_id, now(), b.status, COALESCE(rooms_json, '[]'::jsonb));
+  RETURN NEW;
+END $$;
 
 
-ALTER TYPE public.booking_status OWNER TO booking_user;
+ALTER FUNCTION public.f_insert_booking_log() OWNER TO booking_user;
 
 --
--- Name: room_status; Type: TYPE; Schema: public; Owner: booking_user
+-- Name: trg_booking_status_propagate(); Type: FUNCTION; Schema: public; Owner: booking_user
 --
 
-CREATE TYPE public.room_status AS ENUM (
-    'AVAILABLE',
-    'OCCUPIED',
-    'DIRTY',
-    'MAINTENANCE'
-);
+CREATE FUNCTION public.trg_booking_status_propagate() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  IF NEW.status IS DISTINCT FROM OLD.status THEN
+    CASE NEW.status
+      WHEN 'CHECKED_IN' THEN
+        UPDATE room SET status = 'OCCUPIED'
+        WHERE room_id IN (
+          SELECT room_id FROM booking_room WHERE booking_id = NEW.booking_id
+        );
+      WHEN 'CHECKED_OUT' THEN
+        UPDATE room SET status = 'DIRTY'
+        WHERE room_id IN (
+          SELECT room_id FROM booking_room WHERE booking_id = NEW.booking_id
+        );
+    END CASE;
+  END IF;
+  RETURN NEW;
+END $$;
 
 
-ALTER TYPE public.room_status OWNER TO booking_user;
+ALTER FUNCTION public.trg_booking_status_propagate() OWNER TO booking_user;
+
+--
+-- Name: trg_room_status_log(); Type: FUNCTION; Schema: public; Owner: booking_user
+--
+
+CREATE FUNCTION public.trg_room_status_log() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO room_log(room_id, created_at, status)
+  VALUES (NEW.room_id, now(), NEW.status);
+  RETURN NEW;
+END $$;
+
+
+ALTER FUNCTION public.trg_room_status_log() OWNER TO booking_user;
+
+--
+-- Name: trg_update_hotel_review_stats(); Type: FUNCTION; Schema: public; Owner: booking_user
+--
+
+CREATE FUNCTION public.trg_update_hotel_review_stats() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    v_hotel_id INT;
+    v_diff     INT;
+BEGIN
+    SELECT r.hotel_id
+      INTO v_hotel_id
+      FROM booking_room br
+      JOIN room r ON r.room_id = br.room_id
+      WHERE br.booking_id = NEW.booking_id
+      LIMIT 1;
+
+    IF v_hotel_id IS NULL THEN
+        RETURN NEW;
+    END IF;
+
+    IF TG_OP = 'INSERT' AND NEW.review_rating IS NOT NULL THEN
+        UPDATE hotel
+           SET review_sum   = review_sum   + NEW.review_rating,
+               review_count = review_count + 1
+         WHERE hotel_id = v_hotel_id;
+
+    /* 3. UPDATE – ocena się zmieniła ----------------------------*/
+    ELSIF TG_OP = 'UPDATE' AND NEW.review_rating IS DISTINCT FROM OLD.review_rating THEN
+
+        IF OLD.review_rating IS NULL THEN                      -- NULL → wartość
+            UPDATE hotel
+               SET review_sum   = review_sum   + NEW.review_rating,
+                   review_count = review_count + 1
+             WHERE hotel_id = v_hotel_id;
+
+        ELSIF NEW.review_rating IS NULL THEN                   -- wartość → NULL
+            UPDATE hotel
+               SET review_sum   = review_sum   - OLD.review_rating,
+                   review_count = review_count - 1
+             WHERE hotel_id = v_hotel_id;
+
+        ELSE                                                   -- val1 → val2
+            v_diff := NEW.review_rating - OLD.review_rating;
+            UPDATE hotel
+               SET review_sum = review_sum + v_diff
+             WHERE hotel_id = v_hotel_id;
+        END IF;
+    END IF;
+    RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION public.trg_update_hotel_review_stats() OWNER TO booking_user;
+
+--
+-- Name: trg_update_total_rooms(); Type: FUNCTION; Schema: public; Owner: booking_user
+--
+
+CREATE FUNCTION public.trg_update_total_rooms() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  IF TG_OP = 'INSERT' THEN
+     UPDATE hotel_room_type
+        SET total_rooms = total_rooms + 1
+      WHERE hotel_id = NEW.hotel_id
+        AND type_id  = NEW.type_id;
+  ELSIF TG_OP = 'DELETE' THEN
+     UPDATE hotel_room_type
+        SET total_rooms = total_rooms - 1
+      WHERE hotel_id = OLD.hotel_id
+        AND type_id  = OLD.type_id;
+  END IF;
+  RETURN NULL;
+END;
+$$;
+
+
+ALTER FUNCTION public.trg_update_total_rooms() OWNER TO booking_user;
 
 SET default_tablespace = '';
 
@@ -73,7 +201,7 @@ CREATE TABLE public.booking (
     booking_id integer NOT NULL,
     guest_id integer NOT NULL,
     total_price numeric(10,2) NOT NULL,
-    status public.booking_status DEFAULT 'PENDING'::public.booking_status NOT NULL,
+    status character varying(11) DEFAULT 'PENDING'::character varying NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     review text,
     review_rating smallint,
@@ -114,7 +242,7 @@ CREATE TABLE public.booking_log (
     booking_log_id integer NOT NULL,
     booking_id integer NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
-    status public.booking_status NOT NULL,
+    status character varying(11) NOT NULL,
     booking_rooms jsonb NOT NULL
 );
 
@@ -161,6 +289,26 @@ CREATE TABLE public.booking_room (
 ALTER TABLE public.booking_room OWNER TO booking_user;
 
 --
+-- Name: flyway_schema_history; Type: TABLE; Schema: public; Owner: booking_user
+--
+
+CREATE TABLE public.flyway_schema_history (
+    installed_rank integer NOT NULL,
+    version character varying(50),
+    description character varying(200) NOT NULL,
+    type character varying(20) NOT NULL,
+    script character varying(1000) NOT NULL,
+    checksum integer,
+    installed_by character varying(100) NOT NULL,
+    installed_on timestamp without time zone DEFAULT now() NOT NULL,
+    execution_time integer NOT NULL,
+    success boolean NOT NULL
+);
+
+
+ALTER TABLE public.flyway_schema_history OWNER TO booking_user;
+
+--
 -- Name: guest; Type: TABLE; Schema: public; Owner: booking_user
 --
 
@@ -175,11 +323,7 @@ CREATE TABLE public.guest (
     phone character varying(20),
     email character varying(255),
     CONSTRAINT guest_check CHECK (((email IS NOT NULL) OR (phone IS NOT NULL))),
-    CONSTRAINT guest_check1 CHECK (((email IS NOT NULL) OR (phone IS NOT NULL))),
-    CONSTRAINT guest_check2 CHECK (((email IS NOT NULL) OR (phone IS NOT NULL))),
-    CONSTRAINT guest_date_of_birth_check CHECK ((date_of_birth < CURRENT_DATE)),
-    CONSTRAINT guest_date_of_birth_check1 CHECK ((date_of_birth < CURRENT_DATE)),
-    CONSTRAINT guest_date_of_birth_check2 CHECK ((date_of_birth < CURRENT_DATE))
+    CONSTRAINT guest_date_of_birth_check CHECK ((date_of_birth < CURRENT_DATE))
 );
 
 
@@ -220,18 +364,18 @@ CREATE TABLE public.hotel (
     phone character varying(20) NOT NULL,
     email character varying(255) NOT NULL,
     stars smallint,
-    review_score numeric(3,2),
+    review_sum integer DEFAULT 0 NOT NULL,
+    review_count integer DEFAULT 0 NOT NULL,
     checkin_time time without time zone NOT NULL,
     checkout_time time without time zone NOT NULL,
-    CONSTRAINT hotel_check CHECK ((checkin_time < checkout_time)),
-    CONSTRAINT hotel_check1 CHECK ((checkin_time < checkout_time)),
-    CONSTRAINT hotel_check2 CHECK ((checkin_time < checkout_time)),
-    CONSTRAINT hotel_review_score_check CHECK (((review_score IS NULL) OR ((review_score >= (0)::numeric) AND (review_score <= (5)::numeric)))),
-    CONSTRAINT hotel_review_score_check1 CHECK (((review_score IS NULL) OR ((review_score >= (0)::numeric) AND (review_score <= (5)::numeric)))),
-    CONSTRAINT hotel_review_score_check2 CHECK (((review_score IS NULL) OR ((review_score >= (0)::numeric) AND (review_score <= (5)::numeric)))),
+    CONSTRAINT hotel_check CHECK ((checkin_time > checkout_time)),
+    CONSTRAINT hotel_check1 CHECK ((checkin_time > checkout_time)),
+    CONSTRAINT hotel_review_count_check CHECK ((review_count >= 0)),
+    CONSTRAINT hotel_review_count_check1 CHECK ((review_count >= 0)),
+    CONSTRAINT hotel_review_sum_check CHECK ((review_sum >= 0)),
+    CONSTRAINT hotel_review_sum_check1 CHECK ((review_sum >= 0)),
     CONSTRAINT hotel_stars_check CHECK (((stars IS NULL) OR ((stars >= 1) AND (stars <= 5)))),
-    CONSTRAINT hotel_stars_check1 CHECK (((stars IS NULL) OR ((stars >= 1) AND (stars <= 5)))),
-    CONSTRAINT hotel_stars_check2 CHECK (((stars IS NULL) OR ((stars >= 1) AND (stars <= 5))))
+    CONSTRAINT hotel_stars_check1 CHECK (((stars IS NULL) OR ((stars >= 1) AND (stars <= 5))))
 );
 
 
@@ -270,11 +414,7 @@ CREATE TABLE public.hotel_room_type (
     price_per_night numeric(10,2) NOT NULL,
     total_rooms smallint NOT NULL,
     CONSTRAINT hotel_room_type_price_per_night_check CHECK ((price_per_night > (0)::numeric)),
-    CONSTRAINT hotel_room_type_price_per_night_check1 CHECK ((price_per_night > (0)::numeric)),
-    CONSTRAINT hotel_room_type_price_per_night_check2 CHECK ((price_per_night > (0)::numeric)),
-    CONSTRAINT hotel_room_type_total_rooms_check CHECK ((total_rooms >= 0)),
-    CONSTRAINT hotel_room_type_total_rooms_check1 CHECK ((total_rooms >= 0)),
-    CONSTRAINT hotel_room_type_total_rooms_check2 CHECK ((total_rooms >= 0))
+    CONSTRAINT hotel_room_type_total_rooms_check CHECK ((total_rooms >= 0))
 );
 
 
@@ -289,7 +429,7 @@ CREATE TABLE public.room (
     hotel_id integer NOT NULL,
     type_id integer NOT NULL,
     room_number character varying(10) NOT NULL,
-    status public.room_status DEFAULT 'AVAILABLE'::public.room_status NOT NULL
+    status character varying(11) DEFAULT 'AVAILABLE'::character varying NOT NULL
 );
 
 
@@ -303,7 +443,7 @@ CREATE TABLE public.room_log (
     room_log_id integer NOT NULL,
     room_id integer NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
-    status public.room_status NOT NULL
+    status character varying(11) NOT NULL
 );
 
 
@@ -361,9 +501,7 @@ CREATE TABLE public.room_type (
     type_id integer NOT NULL,
     name character varying(50) NOT NULL,
     capacity smallint NOT NULL,
-    CONSTRAINT room_type_capacity_check CHECK ((capacity > 0)),
-    CONSTRAINT room_type_capacity_check1 CHECK ((capacity > 0)),
-    CONSTRAINT room_type_capacity_check2 CHECK ((capacity > 0))
+    CONSTRAINT room_type_capacity_check CHECK ((capacity > 0))
 );
 
 
@@ -465,6 +603,15 @@ COPY public.booking_room (booking_id, room_id, breakfast, late_checkout, checkin
 
 
 --
+-- Data for Name: flyway_schema_history; Type: TABLE DATA; Schema: public; Owner: booking_user
+--
+
+COPY public.flyway_schema_history (installed_rank, version, description, type, script, checksum, installed_by, installed_on, execution_time, success) FROM stdin;
+1	1	<< Flyway Baseline >>	BASELINE	<< Flyway Baseline >>	\N	booking_user	2025-06-10 00:13:10.301941	0	t
+\.
+
+
+--
 -- Data for Name: guest; Type: TABLE DATA; Schema: public; Owner: booking_user
 --
 
@@ -537,7 +684,7 @@ SELECT pg_catalog.setval('public.guest_guest_id_seq', 1, false);
 -- Name: hotel_hotel_id_seq; Type: SEQUENCE SET; Schema: public; Owner: booking_user
 --
 
-SELECT pg_catalog.setval('public.hotel_hotel_id_seq', 1, false);
+SELECT pg_catalog.setval('public.hotel_hotel_id_seq', 13, true);
 
 
 --
@@ -586,6 +733,14 @@ ALTER TABLE ONLY public.booking_room
 
 
 --
+-- Name: flyway_schema_history flyway_schema_history_pk; Type: CONSTRAINT; Schema: public; Owner: booking_user
+--
+
+ALTER TABLE ONLY public.flyway_schema_history
+    ADD CONSTRAINT flyway_schema_history_pk PRIMARY KEY (installed_rank);
+
+
+--
 -- Name: guest guest_email_key; Type: CONSTRAINT; Schema: public; Owner: booking_user
 --
 
@@ -594,43 +749,11 @@ ALTER TABLE ONLY public.guest
 
 
 --
--- Name: guest guest_email_key1; Type: CONSTRAINT; Schema: public; Owner: booking_user
---
-
-ALTER TABLE ONLY public.guest
-    ADD CONSTRAINT guest_email_key1 UNIQUE (email);
-
-
---
--- Name: guest guest_email_key2; Type: CONSTRAINT; Schema: public; Owner: booking_user
---
-
-ALTER TABLE ONLY public.guest
-    ADD CONSTRAINT guest_email_key2 UNIQUE (email);
-
-
---
 -- Name: guest guest_phone_key; Type: CONSTRAINT; Schema: public; Owner: booking_user
 --
 
 ALTER TABLE ONLY public.guest
     ADD CONSTRAINT guest_phone_key UNIQUE (phone);
-
-
---
--- Name: guest guest_phone_key1; Type: CONSTRAINT; Schema: public; Owner: booking_user
---
-
-ALTER TABLE ONLY public.guest
-    ADD CONSTRAINT guest_phone_key1 UNIQUE (phone);
-
-
---
--- Name: guest guest_phone_key2; Type: CONSTRAINT; Schema: public; Owner: booking_user
---
-
-ALTER TABLE ONLY public.guest
-    ADD CONSTRAINT guest_phone_key2 UNIQUE (phone);
 
 
 --
@@ -658,11 +781,11 @@ ALTER TABLE ONLY public.hotel
 
 
 --
--- Name: hotel hotel_email_key2; Type: CONSTRAINT; Schema: public; Owner: booking_user
+-- Name: hotel hotel_name_country_city_address_key; Type: CONSTRAINT; Schema: public; Owner: booking_user
 --
 
 ALTER TABLE ONLY public.hotel
-    ADD CONSTRAINT hotel_email_key2 UNIQUE (email);
+    ADD CONSTRAINT hotel_name_country_city_address_key UNIQUE (name, country, city, address);
 
 
 --
@@ -679,14 +802,6 @@ ALTER TABLE ONLY public.hotel
 
 ALTER TABLE ONLY public.hotel
     ADD CONSTRAINT hotel_phone_key1 UNIQUE (phone);
-
-
---
--- Name: hotel hotel_phone_key2; Type: CONSTRAINT; Schema: public; Owner: booking_user
---
-
-ALTER TABLE ONLY public.hotel
-    ADD CONSTRAINT hotel_phone_key2 UNIQUE (phone);
 
 
 --
@@ -722,22 +837,6 @@ ALTER TABLE ONLY public.room
 
 
 --
--- Name: room room_hotel_id_room_number_key1; Type: CONSTRAINT; Schema: public; Owner: booking_user
---
-
-ALTER TABLE ONLY public.room
-    ADD CONSTRAINT room_hotel_id_room_number_key1 UNIQUE (hotel_id, room_number);
-
-
---
--- Name: room room_hotel_id_room_number_key2; Type: CONSTRAINT; Schema: public; Owner: booking_user
---
-
-ALTER TABLE ONLY public.room
-    ADD CONSTRAINT room_hotel_id_room_number_key2 UNIQUE (hotel_id, room_number);
-
-
---
 -- Name: room_log room_log_pkey; Type: CONSTRAINT; Schema: public; Owner: booking_user
 --
 
@@ -754,11 +853,26 @@ ALTER TABLE ONLY public.room
 
 
 --
+-- Name: room_type room_type_name_capacity_key; Type: CONSTRAINT; Schema: public; Owner: booking_user
+--
+
+ALTER TABLE ONLY public.room_type
+    ADD CONSTRAINT room_type_name_capacity_key UNIQUE (name, capacity);
+
+
+--
 -- Name: room_type room_type_pkey; Type: CONSTRAINT; Schema: public; Owner: booking_user
 --
 
 ALTER TABLE ONLY public.room_type
     ADD CONSTRAINT room_type_pkey PRIMARY KEY (type_id);
+
+
+--
+-- Name: flyway_schema_history_s_idx; Type: INDEX; Schema: public; Owner: booking_user
+--
+
+CREATE INDEX flyway_schema_history_s_idx ON public.flyway_schema_history USING btree (success);
 
 
 --
@@ -822,6 +936,48 @@ CREATE INDEX idx_room_status_hotel_type ON public.room USING btree (status, hote
 --
 
 CREATE INDEX idx_room_type ON public.room USING btree (type_id);
+
+
+--
+-- Name: booking booking_aiu_log; Type: TRIGGER; Schema: public; Owner: booking_user
+--
+
+CREATE TRIGGER booking_aiu_log AFTER INSERT OR UPDATE ON public.booking FOR EACH ROW EXECUTE FUNCTION public.f_insert_booking_log();
+
+
+--
+-- Name: booking booking_review_stats_trg; Type: TRIGGER; Schema: public; Owner: booking_user
+--
+
+CREATE TRIGGER booking_review_stats_trg AFTER INSERT OR UPDATE OF review_rating ON public.booking FOR EACH ROW EXECUTE FUNCTION public.trg_update_hotel_review_stats();
+
+
+--
+-- Name: booking_room booking_room_aiud_log; Type: TRIGGER; Schema: public; Owner: booking_user
+--
+
+CREATE TRIGGER booking_room_aiud_log AFTER INSERT OR DELETE OR UPDATE ON public.booking_room FOR EACH ROW EXECUTE FUNCTION public.f_insert_booking_log();
+
+
+--
+-- Name: booking booking_status_aiu_rooms; Type: TRIGGER; Schema: public; Owner: booking_user
+--
+
+CREATE TRIGGER booking_status_aiu_rooms AFTER UPDATE OF status ON public.booking FOR EACH ROW EXECUTE FUNCTION public.trg_booking_status_propagate();
+
+
+--
+-- Name: room room_ai_del; Type: TRIGGER; Schema: public; Owner: booking_user
+--
+
+CREATE TRIGGER room_ai_del AFTER INSERT OR DELETE ON public.room FOR EACH ROW EXECUTE FUNCTION public.trg_update_total_rooms();
+
+
+--
+-- Name: room room_aiu_log; Type: TRIGGER; Schema: public; Owner: booking_user
+--
+
+CREATE TRIGGER room_aiu_log AFTER INSERT OR UPDATE ON public.room FOR EACH ROW EXECUTE FUNCTION public.trg_room_status_log();
 
 
 --
