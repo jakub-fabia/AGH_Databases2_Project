@@ -1,8 +1,8 @@
 package edu.agh.hotel.backend.controller;
 
 import edu.agh.hotel.backend.domain.Guest;
-import edu.agh.hotel.backend.dto.Guest.GuestCreateRequest;
-import edu.agh.hotel.backend.dto.Guest.GuestUpdateRequest;
+import edu.agh.hotel.backend.dto.guest.GuestCreateRequest;
+import edu.agh.hotel.backend.dto.guest.GuestUpdateRequest;
 import edu.agh.hotel.backend.dto.SuccessResponse;
 import edu.agh.hotel.backend.service.GuestService;
 import jakarta.validation.Valid;

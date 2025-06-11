@@ -1,4 +1,4 @@
-package edu.agh.hotel.backend.dto.Guest;
+package edu.agh.hotel.backend.dto.guest;
 
 import edu.agh.hotel.backend.domain.Guest;
 import org.mapstruct.Mapper;

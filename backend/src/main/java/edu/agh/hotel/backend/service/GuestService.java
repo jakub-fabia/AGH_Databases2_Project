@@ -1,8 +1,8 @@
 package edu.agh.hotel.backend.service;
 
 import edu.agh.hotel.backend.domain.Guest;
-import edu.agh.hotel.backend.dto.Guest.GuestCreateRequest;
-import edu.agh.hotel.backend.dto.Guest.GuestUpdateRequest;
+import edu.agh.hotel.backend.dto.guest.GuestCreateRequest;
+import edu.agh.hotel.backend.dto.guest.GuestUpdateRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 

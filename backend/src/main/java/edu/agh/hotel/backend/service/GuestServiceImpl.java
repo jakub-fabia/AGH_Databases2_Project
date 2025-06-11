@@ -1,9 +1,9 @@
 package edu.agh.hotel.backend.service;
 
 import edu.agh.hotel.backend.domain.Guest;
-import edu.agh.hotel.backend.dto.Guest.GuestCreateRequest;
-import edu.agh.hotel.backend.dto.Guest.GuestMapper;
-import edu.agh.hotel.backend.dto.Guest.GuestUpdateRequest;
+import edu.agh.hotel.backend.dto.guest.GuestCreateRequest;
+import edu.agh.hotel.backend.dto.guest.GuestMapper;
+import edu.agh.hotel.backend.dto.guest.GuestUpdateRequest;
 import edu.agh.hotel.backend.repository.GuestRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;

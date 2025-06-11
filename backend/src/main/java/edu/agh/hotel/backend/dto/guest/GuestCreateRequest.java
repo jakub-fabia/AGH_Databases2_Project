@@ -1,4 +1,4 @@
-package edu.agh.hotel.backend.dto.Guest;
+package edu.agh.hotel.backend.dto.guest;
 
 import jakarta.validation.constraints.*;
 import java.time.LocalDate;
