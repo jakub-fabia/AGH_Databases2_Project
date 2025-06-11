@@ -25,9 +25,14 @@ public class GuestController {
 
     /* ── LIST ─────────────────────────────────────────────────────── */
 
-    @GetMapping("/all")
-    public Page<Guest> list(@ParameterObject Pageable pageable) {
-        return service.list(pageable);
+    @GetMapping
+    public Page<Guest> list(
+            @RequestParam(required = false) String firstName,
+            @RequestParam(required = false) String lastName,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String phone,
+            @ParameterObject Pageable pageable) {
+        return service.list(firstName, lastName, email, phone, pageable);
     }
 
     /* ── GET ONE ──────────────────────────────────────────────────── */

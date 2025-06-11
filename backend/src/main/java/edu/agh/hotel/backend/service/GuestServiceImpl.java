@@ -6,13 +6,18 @@ import edu.agh.hotel.backend.dto.guest.GuestMapper;
 import edu.agh.hotel.backend.dto.guest.GuestUpdateRequest;
 import edu.agh.hotel.backend.repository.GuestRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -27,8 +32,39 @@ public class GuestServiceImpl implements GuestService {
 
     @Transactional(readOnly = true)
     @Override
-    public Page<Guest> list(Pageable pageable) {
-        return repo.findAll(pageable);
+    public Page<Guest> list(String firstName, String lastName, String email, String phone, Pageable pageable) {
+        Specification<Guest> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (firstName != null) {
+                predicates.add(cb.equal(
+                        cb.lower(root.get("first_name")),
+                        firstName.toLowerCase()
+                ));
+            }
+            if (lastName != null) {
+                predicates.add(cb.equal(
+                        cb.lower(root.get("last_name")),
+                        lastName.toLowerCase()
+                ));
+            }
+            if (email != null) {
+                predicates.add(cb.equal(
+                        cb.lower(root.get("email")),
+                        email.toLowerCase()
+                ));
+            }
+            if (phone != null) {
+                predicates.add(cb.equal(
+                        cb.lower(root.get("phone")),
+                        phone.toLowerCase()
+                ));
+            }
+            if (predicates.isEmpty()) {
+                return cb.conjunction();
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+        return repo.findAll(spec, pageable);
     }
 
     @Transactional(readOnly = true)

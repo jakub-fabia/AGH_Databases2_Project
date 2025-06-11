@@ -7,7 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 
 public interface GuestService {
-    Page<Guest> list(Pageable pageable);
+    Page<Guest> list(String firstName, String lastName, String email, String phone, Pageable pageable);
 
     Guest get(Integer id);
 
