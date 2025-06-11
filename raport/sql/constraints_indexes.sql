@@ -1,18 +1,16 @@
 ALTER TABLE hotel
   ADD UNIQUE(name, country, city, address),
-  ADD UNIQUE(email),
   ADD UNIQUE(phone),
   ADD CHECK (stars IS NULL OR stars BETWEEN 1 AND 5),
-  ADD CHECK (review_sum >= 0),
-  ADD CHECK (review_count >= 0),
   ADD CHECK (checkin_time > checkout_time);
 
 ALTER TABLE room_type
-  ADD UNIQUE (name, capacity),
-  ADD CHECK (capacity > 0);
+  ADD UNIQUE (name);
 
 ALTER TABLE room
-  ADD UNIQUE(hotel_id, room_number);
+  ADD UNIQUE(hotel_id, room_number),
+  ADD CHECK (price_per_night > 0),
+  ADD CHECK (capacity > 0);
 
 ALTER TABLE guest
   ADD UNIQUE(email),
@@ -22,7 +20,7 @@ ALTER TABLE guest
 
 ALTER TABLE booking
   ADD CHECK (total_price > 0),
-  ADD CHECK (review_rating IS NULL OR review_rating BETWEEN 1 AND 5);
+  ADD CHECK (status IN ('PENDING', 'CONFIRMED', 'CANCELLED', 'CHECKED IN', 'COMPLETED'));
 
 ALTER TABLE booking_room
   ADD CHECK (checkout_date > checkin_date);
@@ -37,11 +35,11 @@ ALTER TABLE booking_room
   );
 
 CREATE INDEX idx_room_hotel       ON room            (hotel_id);
-CREATE INDEX idx_room_type        ON room            (type_id);
+CREATE INDEX idx_room_type        ON room            (room_type_id);
 CREATE INDEX idx_booking_guest    ON booking         (guest_id);
 CREATE INDEX idx_booking_room_room ON booking_room    (room_id);
 
-CREATE INDEX idx_room_status_hotel_type ON room (status, hotel_id, type_id);
+CREATE INDEX idx_room_hotel_type ON room (hotel_id, room_type_id);
 
 CREATE INDEX idx_booking_room_dates ON booking_room (checkin_date, checkout_date);
 

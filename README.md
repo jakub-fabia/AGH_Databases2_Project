@@ -8,7 +8,7 @@ Hotel room reservation system, using Java Spring Boot and PostgreSQL.
 
 # Komendy do bazy
 
-**Nazwa konteneru może się różnić, sprawdź za pomocą `mongo ps`**
+**Nazwa kontenera może się różnić, sprawdź za pomocą `mongo ps`**
 
 ```bash
 docker exec -d hotel-app-db-1 pg_dump --host=localhost --port=5432 --dbname=booking --username=booking_user --file=/home/snapshot.sql
