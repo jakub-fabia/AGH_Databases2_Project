@@ -140,16 +140,16 @@ Kompletne definicje SQL znajdują się w pliku [`sql/tables.sql`](./sql/tables
 | created_at                   | TIMESTAMPTZ    | DEFAULT now()         |                                                                          |
 | total_price                  | NUMERIC **NOT NULL** | total_price > 0            | Kwota za całe zamówienie       |
 | status                       | VARCHAR        |                       | Nowy status zamówienia                                                   |
-| booking_rooms                | JSONB          |                       | Nowe szczegóły zamówienia w formie `{room_id, checkin, checkout, breakfast, late_checkout}` |
+| booking_rooms                | JSONB          |                       | Nowe szczegóły zamówienia w formie `{room_id, checkin, checkout}` |
 
 ---
 
-### 1.10 Założenia i uproszczenia
+### 1.9 Założenia i uproszczenia
 
 * Ceny sezonowe nie są modelowane — zakładamy jedną stawkę `price_per_night` na dany pokój
 * Obsługa płatności nie będzie implementowana.
 
-### 1.12 Kod generujący tabele
+### 1.10 Kod generujący tabele
 
 ```sql
 CREATE TABLE hotel (
