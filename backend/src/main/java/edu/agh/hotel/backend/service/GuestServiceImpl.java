@@ -1,0 +1,78 @@
+package edu.agh.hotel.backend.service;
+
+import edu.agh.hotel.backend.domain.Guest;
+import edu.agh.hotel.backend.dto.Guest.GuestCreateRequest;
+import edu.agh.hotel.backend.dto.Guest.GuestMapper;
+import edu.agh.hotel.backend.dto.Guest.GuestUpdateRequest;
+import edu.agh.hotel.backend.repository.GuestRepository;
+import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class GuestServiceImpl implements GuestService {
+
+    private final GuestRepository repo;
+    @Qualifier("guestMapperImpl")
+    private final GuestMapper mapper;
+
+    /* ── READ ─────────────────────────────────────────────────────── */
+
+    @Transactional(readOnly = true)
+    @Override
+    public Page<Guest> list(Pageable pageable) {
+        return repo.findAll(pageable);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Guest get(Integer id) {
+        return repo.findById(id)
+                .orElseThrow(() -> notFound(id));
+    }
+
+    /* ── CREATE ───────────────────────────────────────────────────── */
+
+    @Transactional
+    @Override
+    public Guest create(GuestCreateRequest req) {
+        Guest entity = mapper.toEntity(req);
+        Guest saved = repo.save(entity);
+        log.info("Created Guest {}", saved.getId());
+        return saved;
+    }
+
+    /* ── FULL UPDATE (PUT) ────────────────────────────────────────── */
+
+    @Transactional
+    @Override
+    public Guest update(Integer id, GuestUpdateRequest req) {
+        Guest entity = repo.findById(id)
+                .orElseThrow(() -> notFound(id));
+        mapper.updateEntityFromDto(req, entity);
+        return entity;
+    }
+
+    /* ── DELETE ───────────────────────────────────────────────────── */
+
+    @Transactional
+    @Override
+    public void delete(Integer id) {
+        if (!repo.existsById(id)) throw notFound(id);
+        repo.deleteById(id);
+        log.info("Deleted Guest {}", id);
+    }
+
+    /* ── helper ───────────────────────────────────────────────────── */
+
+    private EntityNotFoundException notFound(Integer id) {
+        return new EntityNotFoundException("Guest " + id + " not found");
+    }
+}
