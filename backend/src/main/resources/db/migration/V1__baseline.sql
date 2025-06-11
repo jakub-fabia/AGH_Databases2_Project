@@ -37,10 +37,10 @@ CREATE TABLE guest (
   last_name     VARCHAR(50)  NOT NULL,
   date_of_birth DATE         NOT NULL,
   country       VARCHAR(30)  NOT NULL,
-  phone         VARCHAR(20),
-  email         VARCHAR(255),
   city          VARCHAR(30)  NOT NULL,
-  address       TEXT         NOT NULL
+  address       TEXT         NOT NULL,
+  phone         VARCHAR(20),
+  email         VARCHAR(255)
 );
 
 CREATE TABLE booking (
