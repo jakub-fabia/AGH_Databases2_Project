@@ -8,13 +8,9 @@ import org.mapstruct.MappingTarget;
 @Mapper(componentModel = "spring")
 public interface HotelMapper {
 
-    @Mapping(target = "id",            ignore = true)
-    @Mapping(target = "reviewSum",     constant = "0")
-    @Mapping(target = "reviewCount",   constant = "0")
+    @Mapping(target = "id", ignore = true)
     Hotel toEntity(HotelCreateRequest dto);
 
-    @Mapping(target = "id",          ignore = true)
-    @Mapping(target = "reviewSum",   ignore = true)
-    @Mapping(target = "reviewCount", ignore = true)
+    @Mapping(target = "id", ignore = true)
     void updateEntityFromDto(HotelUpdateRequest dto, @MappingTarget Hotel entity);
 }
