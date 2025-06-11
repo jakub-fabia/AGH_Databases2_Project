@@ -8,11 +8,13 @@
 
 ![Diagram ER](./img/Schema.png)
 
-Kompletne definicje SQL znajdują się w pliku [`sql/tables_enums.sql`](./sql/tables_enums.sql).
+Kompletne definicje SQL znajdują się w pliku [`sql/tables.sql`](./sql/tables.sql).
 
 ---
 
 <div style="page-break-after: always;"></div>
+
+# NIEAKTUALNE DO POPRAWY!!!!!!!!!!!
 
 ### 1.1 Tabela `hotel`
 

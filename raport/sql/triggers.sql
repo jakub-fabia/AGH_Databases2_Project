@@ -1,8 +1,8 @@
 CREATE OR REPLACE FUNCTION trg_room_status_log()
 RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
-  INSERT INTO room_log(room_id, created_at, status)
-  VALUES (NEW.room_id, now(), NEW.status);
+  INSERT INTO room_log(room_id, created_at, status, price_per_night)
+  VALUES (NEW.room_id, now(), NEW.status, NEW.price_per_night);
   RETURN NEW;
 END $$;
 
@@ -21,9 +21,7 @@ BEGIN
   SELECT jsonb_agg(jsonb_build_object(
            'room_id',       room_id,
            'checkin_date',  checkin_date,
-           'checkout_date', checkout_date,
-           'breakfast',     breakfast,
-           'late_checkout', late_checkout))
+           'checkout_date', checkout_date))
     INTO rooms_json
   FROM booking_room
   WHERE booking_id = NEW.booking_id;
@@ -35,10 +33,6 @@ END $$;
 
 CREATE TRIGGER booking_aiu_log
 AFTER INSERT OR UPDATE ON booking
-FOR EACH ROW EXECUTE FUNCTION f_insert_booking_log();
-
-CREATE TRIGGER booking_room_aiud_log
-AFTER INSERT OR UPDATE OR DELETE ON booking_room
 FOR EACH ROW EXECUTE FUNCTION f_insert_booking_log();
 
 CREATE OR REPLACE FUNCTION trg_booking_status_propagate()
@@ -121,25 +115,3 @@ AFTER INSERT OR UPDATE OF review_rating
 ON booking
 FOR EACH ROW
 EXECUTE FUNCTION trg_update_hotel_review_stats();
-
-CREATE OR REPLACE FUNCTION trg_update_total_rooms()
-RETURNS trigger LANGUAGE plpgsql AS $$
-BEGIN
-  IF TG_OP = 'INSERT' THEN
-     UPDATE hotel_room_type
-        SET total_rooms = total_rooms + 1
-      WHERE hotel_id = NEW.hotel_id
-        AND type_id  = NEW.type_id;
-  ELSIF TG_OP = 'DELETE' THEN
-     UPDATE hotel_room_type
-        SET total_rooms = total_rooms - 1
-      WHERE hotel_id = OLD.hotel_id
-        AND type_id  = OLD.type_id;
-  END IF;
-  RETURN NULL;
-END;
-$$;
-
-CREATE TRIGGER room_ai_del
-AFTER INSERT OR DELETE ON room
-FOR EACH ROW EXECUTE FUNCTION trg_update_total_rooms();

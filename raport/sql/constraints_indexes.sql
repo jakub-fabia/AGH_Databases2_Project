@@ -11,10 +11,6 @@ ALTER TABLE room_type
   ADD UNIQUE (name, capacity),
   ADD CHECK (capacity > 0);
 
-ALTER TABLE hotel_room_type
-  ADD CHECK (price_per_night > 0),
-  ADD CHECK (total_rooms >= 0);
-
 ALTER TABLE room
   ADD UNIQUE(hotel_id, room_number);
 
@@ -42,7 +38,6 @@ ALTER TABLE booking_room
 
 CREATE INDEX idx_room_hotel       ON room            (hotel_id);
 CREATE INDEX idx_room_type        ON room            (type_id);
-CREATE INDEX idx_hotel_room_type   ON hotel_room_type (type_id);
 CREATE INDEX idx_booking_guest    ON booking         (guest_id);
 CREATE INDEX idx_booking_room_room ON booking_room    (room_id);
 

@@ -19,30 +19,21 @@ CREATE TABLE room_type (
   capacity    SMALLINT    NOT NULL
 );
 
-CREATE TABLE hotel_room_type (
-  hotel_id        INT           REFERENCES hotel,
-  type_id         INT           REFERENCES room_type,
-  description     TEXT          NOT NULL,
-  price_per_night NUMERIC(10,2) NOT NULL,
-  total_rooms     SMALLINT      NOT NULL,
-  PRIMARY KEY (hotel_id, type_id)
-);
-
-
 CREATE TABLE room (
   room_id      SERIAL      PRIMARY KEY,
-  hotel_id     INT         NOT NULL,
-  type_id      INT         NOT NULL,
+  hotel_id     INT         NOT NULL REFERENCES hotel,
+  type_id      INT         NOT NULL REFERENCES room_type,
   room_number  VARCHAR(10) NOT NULL,
-  status       VARCHAR(11) NOT NULL DEFAULT 'AVAILABLE',
-  FOREIGN KEY (hotel_id, type_id) REFERENCES hotel_room_type(hotel_id, type_id)
+  price_per_night NUMERIC(10,2) NOT NULL,
+  status       VARCHAR(11) NOT NULL DEFAULT 'AVAILABLE'
 );
 
 CREATE TABLE room_log (
-  room_log_id SERIAL         PRIMARY KEY,
-  room_id     INT            NOT NULL REFERENCES room,
-  created_at  TIMESTAMPTZ    NOT NULL DEFAULT now(),
-  status      VARCHAR(11)    NOT NULL
+  room_log_id     SERIAL         PRIMARY KEY,
+  room_id         INT            NOT NULL REFERENCES room,
+  created_at      TIMESTAMPTZ    NOT NULL DEFAULT now(),
+  price_per_night NUMERIC(10,2)  NOT NULL,
+  status          VARCHAR(11)    NOT NULL
 );
 
 CREATE TABLE guest (
@@ -57,10 +48,10 @@ CREATE TABLE guest (
   email         VARCHAR(255)
 );
 
-
 CREATE TABLE booking (
   booking_id     SERIAL         PRIMARY KEY,
   guest_id       INT            NOT NULL REFERENCES guest,
+  hotel_id       INT            NOT NULL REFERENCES hotel,
   total_price    NUMERIC(10,2)  NOT NULL,
   status         VARCHAR(11)    NOT NULL DEFAULT 'PENDING',
   created_at     TIMESTAMPTZ    NOT NULL DEFAULT now(),
@@ -68,17 +59,13 @@ CREATE TABLE booking (
   review_rating  SMALLINT
 );
 
-
 CREATE TABLE booking_room (
   booking_id    INT            NOT NULL REFERENCES booking,
   room_id       INT            NOT NULL REFERENCES room,
-  breakfast     BOOLEAN        NOT NULL DEFAULT false,
-  late_checkout BOOLEAN        NOT NULL DEFAULT false,
   checkin_date   DATE          NOT NULL,
   checkout_date  DATE          NOT NULL,
   PRIMARY KEY (booking_id, room_id)
 );
-
 
 CREATE TABLE booking_log (
   booking_log_id SERIAL         PRIMARY KEY,
@@ -87,4 +74,3 @@ CREATE TABLE booking_log (
   status         VARCHAR(11)    NOT NULL,
   booking_rooms  JSONB          NOT NULL
 );
-
