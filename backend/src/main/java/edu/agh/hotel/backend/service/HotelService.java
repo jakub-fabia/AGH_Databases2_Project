@@ -8,11 +8,7 @@ import org.springframework.data.domain.Pageable;
 
 public interface HotelService {
 
-    Page<Hotel> list(Pageable pageable);
-
-    Page<Hotel> list(String city, String country, Pageable pageable);
-
-    Page<Hotel> list(short stars, Pageable pageable);
+    Page<Hotel> list(String country, String city, String name, Integer stars, Pageable pageable);
 
     Hotel get(Long id);
 

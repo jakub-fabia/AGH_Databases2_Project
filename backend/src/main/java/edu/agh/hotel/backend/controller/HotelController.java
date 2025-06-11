@@ -25,26 +25,16 @@ public class HotelController {
 
     /* ── LIST ─────────────────────────────────────────────────────── */
 
-    @GetMapping("/all")
-    public Page<Hotel> list(
-            @ParameterObject Pageable pageable) {
-        return service.list(pageable);
-    }
-
     @GetMapping
     public Page<Hotel> list(
-            @RequestParam String city,
-            @RequestParam String country,
+            @RequestParam(required = false) String city,
+            @RequestParam(required = false) String country,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Integer stars,
             @ParameterObject Pageable pageable) {
-        return service.list(city, country, pageable);
+        return service.list(country, city, name, stars, pageable);
     }
 
-    @GetMapping("/stars/{stars}")
-    public Page<Hotel> listByStars(
-            @PathVariable short stars,
-            @ParameterObject Pageable pageable) {
-        return service.list(stars, pageable);
-    }
 
     /* ── GET ONE ──────────────────────────────────────────────────── */
 
