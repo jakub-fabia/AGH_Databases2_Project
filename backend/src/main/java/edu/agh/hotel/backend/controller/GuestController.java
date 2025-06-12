@@ -1,5 +1,7 @@
 package edu.agh.hotel.backend.controller;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import edu.agh.hotel.backend.Views.GuestViews;
 import edu.agh.hotel.backend.domain.Guest;
 import edu.agh.hotel.backend.dto.SuccessResponse;
 import edu.agh.hotel.backend.dto.guest.GuestCreateRequest;
@@ -26,6 +28,7 @@ public class GuestController {
     /* ── LIST ─────────────────────────────────────────────────────── */
 
     @GetMapping
+    @JsonView(GuestViews.Summary.class)
     public Page<Guest> list(
             @RequestParam(required = false) String firstName,
             @RequestParam(required = false) String lastName,
@@ -35,9 +38,16 @@ public class GuestController {
         return service.list(firstName, lastName, email, phone, pageable);
     }
 
+    @GetMapping("/bookings/{id}")
+    @JsonView(GuestViews.WithBookings.class)
+    public Guest getBookings(@PathVariable Integer id) {
+        return service.getBookings(id);
+    }
+
     /* ── GET ONE ──────────────────────────────────────────────────── */
 
     @GetMapping("/{id}")
+    @JsonView(GuestViews.Summary.class)
     public Guest get(@PathVariable Integer id) {
         return service.get(id);
     }

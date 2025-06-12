@@ -74,6 +74,13 @@ public class GuestServiceImpl implements GuestService {
                 .orElseThrow(() -> notFound(id));
     }
 
+    @Transactional(readOnly = true)
+    @Override
+    public Guest getBookings(Integer id) {
+        return repo.findWithBookingsAndRoomsById(id)
+                .orElseThrow(() -> notFound(id));
+    }
+
     /* ── CREATE ───────────────────────────────────────────────────── */
 
     @Transactional

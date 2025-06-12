@@ -9,6 +9,8 @@ import org.springframework.data.domain.Page;
 public interface GuestService {
     Page<Guest> list(String firstName, String lastName, String email, String phone, Pageable pageable);
 
+    Guest getBookings(Integer id);
+
     Guest get(Integer id);
 
     Guest create(GuestCreateRequest request);

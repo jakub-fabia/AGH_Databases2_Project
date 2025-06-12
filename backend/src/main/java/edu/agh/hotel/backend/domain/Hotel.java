@@ -1,5 +1,8 @@
 package edu.agh.hotel.backend.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonView;
+import edu.agh.hotel.backend.Views.GuestViews;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -15,6 +18,8 @@ import java.util.Objects;
 @Data
 @Entity
 @Table(name = "hotel")
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
+@JsonView(GuestViews.WithBookings.class)
 public class Hotel {
 
     /* ---------- Primary key ---------- */
