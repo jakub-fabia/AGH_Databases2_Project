@@ -6,15 +6,18 @@ import edu.agh.hotel.backend.dto.hotel.HotelCreateRequest;
 import edu.agh.hotel.backend.dto.hotel.HotelUpdateRequest;
 import edu.agh.hotel.backend.service.HotelService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.FutureOrPresent;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/hotels")
@@ -33,6 +36,20 @@ public class HotelController {
             @RequestParam(required = false) Integer stars,
             @ParameterObject Pageable pageable) {
         return service.list(country, city, name, stars, pageable);
+    }
+
+    /* ── COUNT AVAILABLE ROOMS ────────────────────────────────────── */
+
+    @GetMapping("/{id}/available")
+    public long count(
+            @PathVariable Long id,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            @FutureOrPresent LocalDate checkin,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            @FutureOrPresent LocalDate checkout,
+            @RequestParam(required = false) Integer roomTypeId
+    ) {
+        return service.countAvailableRooms(id, roomTypeId, checkin, checkout);
     }
 
 
