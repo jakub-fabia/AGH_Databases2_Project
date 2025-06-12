@@ -1,4 +1,4 @@
-package edu.agh.hotel.backend.Views;
+package edu.agh.hotel.backend.views;
 
 public class GuestViews {
     public interface Summary {}

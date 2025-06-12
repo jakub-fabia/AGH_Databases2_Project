@@ -1,7 +1,7 @@
 package edu.agh.hotel.backend.domain;
 
 import com.fasterxml.jackson.annotation.*;
-import edu.agh.hotel.backend.Views.GuestViews;
+import edu.agh.hotel.backend.views.GuestViews;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;

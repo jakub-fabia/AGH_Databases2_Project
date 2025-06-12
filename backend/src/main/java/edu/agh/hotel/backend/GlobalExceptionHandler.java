@@ -56,7 +56,7 @@ public class GlobalExceptionHandler {
 //    public ResponseEntity<ErrorResponse> handleAll(Exception ex) {
 //        ErrorResponse error = new ErrorResponse(
 //                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-//                "An unexpected error occurred",
+//                "An unexp ected error occurred",
 //                Instant.now()
 //        );
 //        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);

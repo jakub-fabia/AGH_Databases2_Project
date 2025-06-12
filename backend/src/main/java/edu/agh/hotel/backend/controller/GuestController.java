@@ -1,7 +1,7 @@
 package edu.agh.hotel.backend.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import edu.agh.hotel.backend.Views.GuestViews;
+import edu.agh.hotel.backend.views.GuestViews;
 import edu.agh.hotel.backend.domain.Guest;
 import edu.agh.hotel.backend.dto.SuccessResponse;
 import edu.agh.hotel.backend.dto.guest.GuestCreateRequest;

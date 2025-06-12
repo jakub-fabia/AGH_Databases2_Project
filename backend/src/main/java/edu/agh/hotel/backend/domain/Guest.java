@@ -3,7 +3,7 @@ package edu.agh.hotel.backend.domain;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonView;
-import edu.agh.hotel.backend.Views.GuestViews;
+import edu.agh.hotel.backend.views.GuestViews;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Data;
