@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public interface RoomService {
-    public Page<Room> list(
+    Page<Room> list(
             LocalDate checkin,
             LocalDate checkout,
             Integer roomTypeId,
@@ -23,6 +23,8 @@ public interface RoomService {
             Integer hotelStars,
             Pageable pageable
     );
+
+    boolean isAvailable(Long roomId, LocalDate checkin, LocalDate checkout);
 
     Room get(Long id);
 

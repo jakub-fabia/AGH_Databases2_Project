@@ -6,6 +6,7 @@ import edu.agh.hotel.backend.domain.RoomType;
 import edu.agh.hotel.backend.dto.room.RoomCreateRequest;
 import edu.agh.hotel.backend.dto.room.RoomMapper;
 import edu.agh.hotel.backend.dto.room.RoomUpdateRequest;
+import edu.agh.hotel.backend.repository.BookingRoomRepository;
 import edu.agh.hotel.backend.repository.HotelRepository;
 import edu.agh.hotel.backend.repository.RoomRepository;
 import edu.agh.hotel.backend.repository.RoomTypeRepository;
@@ -29,6 +30,7 @@ public class RoomServiceImpl implements RoomService {
     private final RoomRepository roomRepo;
     private final HotelRepository hotelRepo;
     private final RoomTypeRepository roomTypeRepo;
+    private final BookingRoomRepository bookingRoomRepo;
     @Qualifier("roomMapperImpl")
     private final RoomMapper mapper;
 
@@ -58,6 +60,27 @@ public class RoomServiceImpl implements RoomService {
                 ),
                 pageable
         );
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public boolean isAvailable(Long roomId, LocalDate checkin, LocalDate checkout) {
+        // basic validation
+        if (checkin == null || checkout == null || !checkin.isBefore(checkout)) {
+            throw new IllegalArgumentException("Must provide checkin < checkout");
+        }
+
+        // ensure room exists
+        if (!roomRepo.existsById(roomId.intValue())) {
+            throw new EntityNotFoundException("Room " + roomId + " not found");
+        }
+
+        // if any overlapping booking exists, it's not available
+        boolean overlap = bookingRoomRepo
+                .existsByRoom_IdAndCheckinDateLessThanAndCheckoutDateGreaterThan(
+                        roomId.intValue(), checkout, checkin);
+
+        return !overlap;
     }
 
     @Transactional(readOnly = true)

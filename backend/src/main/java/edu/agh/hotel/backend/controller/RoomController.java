@@ -63,6 +63,24 @@ public class RoomController {
         );
     }
 
+    @GetMapping("/{id}/available")
+    public boolean isAvailable(
+            @PathVariable Long id,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            @FutureOrPresent LocalDate checkin,
+
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            @FutureOrPresent LocalDate checkout
+    ) {
+        if (!checkin.isBefore(checkout)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "checkin date must be before checkout date"
+            );
+        }
+        return roomService.isAvailable(id, checkin, checkout);
+    }
+
     @GetMapping("/{id}")
     public Room get(@PathVariable Long id) {
         return roomService.get(id);
