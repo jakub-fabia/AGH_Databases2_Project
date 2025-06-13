@@ -1,7 +1,9 @@
 package edu.agh.hotel.backend.domain;
 
-import com.fasterxml.jackson.annotation.*;
-import edu.agh.hotel.backend.views.GuestViews;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
@@ -18,7 +20,7 @@ import java.util.Objects;
 @Table(name = "booking_room")
 @Check(constraints = "checkout_date > checkin_date")
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
-@JsonView(GuestViews.WithBookings.class)
+
 public class BookingRoom {
 
     /* ---------- Primary key ---------- */

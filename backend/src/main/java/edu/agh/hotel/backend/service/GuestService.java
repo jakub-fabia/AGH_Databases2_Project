@@ -3,8 +3,8 @@ package edu.agh.hotel.backend.service;
 import edu.agh.hotel.backend.domain.Guest;
 import edu.agh.hotel.backend.dto.guest.GuestCreateRequest;
 import edu.agh.hotel.backend.dto.guest.GuestUpdateRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface GuestService {
     Page<Guest> list(String firstName, String lastName, String email, String phone, Pageable pageable);

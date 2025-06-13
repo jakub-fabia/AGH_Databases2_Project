@@ -1,5 +1,6 @@
 package edu.agh.hotel.backend.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,6 +13,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @Entity
 @Table(name = "room_log")
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class RoomLog {
 
     @Id

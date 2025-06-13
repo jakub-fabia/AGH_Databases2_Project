@@ -3,6 +3,7 @@ package edu.agh.hotel.backend.service;
 import edu.agh.hotel.backend.domain.Guest;
 import edu.agh.hotel.backend.dto.guest.GuestCreateRequest;
 import edu.agh.hotel.backend.dto.guest.GuestMapper;
+import edu.agh.hotel.backend.dto.guest.GuestSummary;
 import edu.agh.hotel.backend.dto.guest.GuestUpdateRequest;
 import edu.agh.hotel.backend.repository.GuestRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -37,13 +38,13 @@ public class GuestServiceImpl implements GuestService {
             List<Predicate> predicates = new ArrayList<>();
             if (firstName != null) {
                 predicates.add(cb.equal(
-                        cb.lower(root.get("first_name")),
+                        cb.lower(root.get("firstName")),
                         firstName.toLowerCase()
                 ));
             }
             if (lastName != null) {
                 predicates.add(cb.equal(
-                        cb.lower(root.get("last_name")),
+                        cb.lower(root.get("lastName")),
                         lastName.toLowerCase()
                 ));
             }

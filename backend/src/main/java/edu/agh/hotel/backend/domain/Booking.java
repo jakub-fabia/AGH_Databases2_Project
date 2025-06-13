@@ -1,7 +1,6 @@
 package edu.agh.hotel.backend.domain;
 
 import com.fasterxml.jackson.annotation.*;
-import edu.agh.hotel.backend.views.GuestViews;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
@@ -20,7 +19,6 @@ import java.util.Set;
 @Entity
 @Table(name = "booking")
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
-@JsonView(GuestViews.WithBookings.class)
 public class Booking {
 
     /* ---------- Primary key ---------- */
