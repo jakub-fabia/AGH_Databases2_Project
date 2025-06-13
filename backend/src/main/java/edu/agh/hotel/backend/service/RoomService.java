@@ -31,6 +31,4 @@ public interface RoomService {
     Room create(RoomCreateRequest request);
 
     Room update(Long id, RoomUpdateRequest request);
-
-    void delete(Long id);
 }

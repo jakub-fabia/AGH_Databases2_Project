@@ -84,6 +84,11 @@ public class Booking {
         this.status = status;
     }
 
+    public void addBookingRoom(BookingRoom bookingRoom) {
+        bookingRooms.add(bookingRoom);
+        bookingRoom.setBooking(this);
+    }
+
     /* ---------- Equality (by id) ---------- */
 
     @Override

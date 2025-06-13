@@ -1,5 +1,6 @@
 package edu.agh.hotel.backend.controller;
 
+import edu.agh.hotel.backend.domain.Booking;
 import edu.agh.hotel.backend.domain.Hotel;
 import edu.agh.hotel.backend.dto.SuccessResponse;
 import edu.agh.hotel.backend.dto.hotel.HotelCreateRequest;
@@ -18,6 +19,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.List;
+
+import static org.springframework.format.annotation.DateTimeFormat.ISO.DATE;
 
 @RestController
 @RequestMapping("/api/hotels")
@@ -36,6 +40,17 @@ public class HotelController {
             @RequestParam(required = false) Integer stars,
             @ParameterObject Pageable pageable) {
         return service.list(country, city, name, stars, pageable);
+    }
+
+    @GetMapping("/{hotelId}/occupancy")
+    public List<Booking> getOccupancy(
+            @PathVariable Long hotelId,
+            @RequestParam
+            @DateTimeFormat(iso = DATE)
+            @FutureOrPresent(message = "date must be today or in the future")
+            LocalDate date
+    ) {
+        return service.listOccupancy(hotelId, date);
     }
 
     /* ── COUNT AVAILABLE ROOMS ────────────────────────────────────── */

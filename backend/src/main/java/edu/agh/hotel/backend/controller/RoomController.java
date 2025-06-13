@@ -101,12 +101,5 @@ public class RoomController {
     ) {
         return roomService.update(id, request);
     }
-
-
-    @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
-        roomService.delete(id);
-    }
 }
 

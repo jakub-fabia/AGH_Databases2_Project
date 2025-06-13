@@ -138,14 +138,4 @@ public class RoomServiceImpl implements RoomService {
         log.info("Updated Room {}", updated.getId());
         return updated;
     }
-
-    @Transactional
-    @Override
-    public void delete(Long id) {
-        if (!roomRepo.existsById(id.intValue())) {
-            throw new EntityNotFoundException("Room " + id + " not found");
-        }
-        roomRepo.deleteById(id.intValue());
-        log.info("Deleted Room {}", id);
-    }
 }
