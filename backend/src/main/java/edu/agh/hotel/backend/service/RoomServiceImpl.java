@@ -10,6 +10,7 @@ import edu.agh.hotel.backend.repository.BookingRoomRepository;
 import edu.agh.hotel.backend.repository.HotelRepository;
 import edu.agh.hotel.backend.repository.RoomRepository;
 import edu.agh.hotel.backend.repository.RoomTypeRepository;
+import edu.agh.hotel.backend.specification.RoomSpecification;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

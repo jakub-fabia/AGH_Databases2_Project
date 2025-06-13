@@ -1,4 +1,4 @@
-package edu.agh.hotel.backend.service;
+package edu.agh.hotel.backend.specification;
 
 import edu.agh.hotel.backend.domain.BookingRoom;
 import edu.agh.hotel.backend.domain.Hotel;
