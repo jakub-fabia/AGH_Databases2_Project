@@ -37,28 +37,22 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     @Override
     public Booking create(BookingCreateRequest req) {
-        // Map scalar fields
         Booking booking = bookingMapper.toEntity(req);
 
-        // Set guest
         Guest guest = guestRepo.findById(req.guestId())
                 .orElseThrow(() -> new EntityNotFoundException("Guest " + req.guestId() + " not found"));
         booking.setGuest(guest);
 
-        // Set hotel
         Hotel hotel = hotelRepo.findById(Long.valueOf(req.hotelId()))
                 .orElseThrow(() -> new EntityNotFoundException("Hotel " + req.hotelId() + " not found"));
         booking.setHotel(hotel);
 
         BigDecimal total = BigDecimal.ZERO;
 
-        // For each room‐request, validate and add a BookingRoom
         for (var brReq : req.bookingRooms()) {
-            // ensure room exists
             Room room = roomRepo.findById(brReq.roomId())
                     .orElseThrow(() -> new EntityNotFoundException("Room " + brReq.roomId() + " not found"));
 
-            // check availability
             boolean overlap = bookingRoomRepo.existsByRoom_IdAndCheckinDateLessThanAndCheckoutDateGreaterThan(
                     room.getId(),
                     brReq.checkoutDate(),
@@ -91,10 +85,8 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = bookingRepo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Booking " + id + " not found"));
 
-        // update simple fields
         bookingMapper.updateEntityFromDto(req, booking);
 
-        // replace bookingRooms if provided
         if (req.bookingRooms() != null) {
             booking.getBookingRooms().clear();
             BigDecimal total = BigDecimal.ZERO;
@@ -103,7 +95,6 @@ public class BookingServiceImpl implements BookingService {
                 Room room = roomRepo.findById(brReq.roomId())
                         .orElseThrow(() -> new EntityNotFoundException("Room " + brReq.roomId() + " not found"));
 
-                // <-- here: exclude this booking’s own rooms
                 boolean overlap = bookingRoomRepo
                         .existsByRoom_IdAndBooking_IdNotAndCheckinDateLessThanAndCheckoutDateGreaterThan(
                                 room.getId(),
@@ -125,10 +116,8 @@ public class BookingServiceImpl implements BookingService {
                 BookingRoom br = new BookingRoom(booking, room, brReq.checkinDate(), brReq.checkoutDate());
                 booking.addBookingRoom(br);
             }
-
             booking.setTotalPrice(total);
         }
-
         return bookingRepo.save(booking);
     }
 
