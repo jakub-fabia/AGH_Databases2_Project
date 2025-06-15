@@ -74,17 +74,14 @@ public class RoomServiceImpl implements RoomService {
     @Transactional(readOnly = true)
     @Override
     public boolean isAvailable(Long roomId, LocalDate checkin, LocalDate checkout) {
-        // basic validation
         if (checkin == null || checkout == null || !checkin.isBefore(checkout)) {
             throw new IllegalArgumentException("Must provide checkin < checkout");
         }
 
-        // ensure room exists
         if (!roomRepo.existsById(roomId.intValue())) {
             throw new EntityNotFoundException("Room " + roomId + " not found");
         }
 
-        // if any overlapping booking exists, it's not available
         boolean overlap = bookingRoomRepo
                 .existsByRoom_IdAndCheckinDateLessThanAndCheckoutDateGreaterThan(
                         roomId.intValue(), checkout, checkin);
@@ -102,15 +99,12 @@ public class RoomServiceImpl implements RoomService {
     @Transactional
     @Override
     public Room create(RoomCreateRequest req) {
-        // map basic fields
         Room room = mapper.toEntity(req);
 
-        // look up Hotel
         Hotel hotel = hotelRepo.findById(Long.valueOf(req.hotelId()))
                 .orElseThrow(() -> new EntityNotFoundException("Hotel " + req.hotelId() + " not found"));
         room.setHotel(hotel);
 
-        // look up RoomType
         RoomType type = roomTypeRepo.findById(req.roomTypeId())
                 .orElseThrow(() -> new EntityNotFoundException("RoomType " + req.roomTypeId() + " not found"));
         room.setRoomType(type);
@@ -126,17 +120,14 @@ public class RoomServiceImpl implements RoomService {
         Room room = roomRepo.findById(id.intValue())
                 .orElseThrow(() -> new EntityNotFoundException("Room " + id + " not found"));
 
-        // apply simple field updates
         mapper.updateEntityFromDto(req, room);
 
-        // optional: change hotel association
         if (req.hotelId() != null) {
             Hotel hotel = hotelRepo.findById(Long.valueOf(req.hotelId()))
                     .orElseThrow(() -> new EntityNotFoundException("Hotel " + req.hotelId() + " not found"));
             room.setHotel(hotel);
         }
 
-        // optional: change roomType association
         if (req.roomTypeId() != null) {
             RoomType type = roomTypeRepo.findById(req.roomTypeId())
                     .orElseThrow(() -> new EntityNotFoundException("RoomType " + req.roomTypeId() + " not found"));

@@ -49,8 +49,6 @@ public class GuestServiceImpl implements GuestService {
                 .orElseThrow(() -> notFound(id));
     }
 
-    /* ── CREATE ───────────────────────────────────────────────────── */
-
     @Transactional
     @Override
     public Guest create(GuestCreateRequest req) {
@@ -59,8 +57,6 @@ public class GuestServiceImpl implements GuestService {
         log.info("Created Guest {}", saved.getId());
         return saved;
     }
-
-    /* ── FULL UPDATE (PUT) ────────────────────────────────────────── */
 
     @Transactional
     @Override
@@ -71,8 +67,6 @@ public class GuestServiceImpl implements GuestService {
         return entity;
     }
 
-    /* ── DELETE ───────────────────────────────────────────────────── */
-
     @Transactional
     @Override
     public void delete(Integer id) {
@@ -80,8 +74,6 @@ public class GuestServiceImpl implements GuestService {
         repo.deleteById(id);
         log.info("Deleted Guest {}", id);
     }
-
-    /* ── helper ───────────────────────────────────────────────────── */
 
     private EntityNotFoundException notFound(Integer id) {
         return new EntityNotFoundException("Guest " + id + " not found");

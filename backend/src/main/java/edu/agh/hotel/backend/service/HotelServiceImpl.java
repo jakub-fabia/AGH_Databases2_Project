@@ -36,8 +36,6 @@ public class HotelServiceImpl implements HotelService {
     @Qualifier("hotelMapperImpl")
     private final HotelMapper mapper;
 
-    /* ── READ ─────────────────────────────────────────────────────── */
-
     @Transactional(readOnly = true)
     @Override
     public Page<Hotel> list(String country, String city, String name, Integer stars, Pageable pageable) {
@@ -53,41 +51,29 @@ public class HotelServiceImpl implements HotelService {
     @Override
     @Transactional(readOnly = true)
     public List<Booking> listOccupancy(Long hotelId, LocalDate date) {
-        // ensure hotel exists (optional; or let downstream emptiness speak)
-        // bookingRepo.findByHotel_Id(hotelId).orElseThrow(...);
-
-        // 1) load only those BookingRoom rows overlapping date
         List<BookingRoom> rooms = bookingRoomRepo
                 .findAllByRoom_Hotel_IdAndCheckinDateLessThanEqualAndCheckoutDateGreaterThanEqual(
                         hotelId.intValue(), date, date
                 );
 
-        // 2) group by Booking
         Map<Booking, List<BookingRoom>> byBooking = rooms.stream()
                 .collect(Collectors.groupingBy(BookingRoom::getBooking));
 
-        // 3) for each booking, filter its bookingRooms to only those on this date
         List<Booking> result = new ArrayList<>();
         for (Map.Entry<Booking, List<BookingRoom>> e : byBooking.entrySet()) {
             Booking booking = e.getKey();
-            // detach or clear existing to avoid mixing with other dates
             booking.getBookingRooms().clear();
-            // reattach only the relevant rooms
             e.getValue().forEach(booking::addBookingRoom);
             result.add(booking);
         }
-
         return result;
     }
-
 
     @Transactional(readOnly = true)
     @Override
     public Hotel get(Long id) {
         return repo.findById(id).orElseThrow(() -> notFound(id));
     }
-
-    /* ── CREATE ───────────────────────────────────────────────────── */
 
     @Transactional
     @Override
@@ -98,8 +84,6 @@ public class HotelServiceImpl implements HotelService {
         return saved;
     }
 
-    /* ── UPDATE (PUT) ────────────────────────────────────────── */
-
     @Transactional
     @Override
     public Hotel update(Long id, HotelUpdateRequest req) {
@@ -108,8 +92,6 @@ public class HotelServiceImpl implements HotelService {
         return entity;
     }
 
-    /* ── DELETE ───────────────────────────────────────────────────── */
-
     @Transactional
     @Override
     public void delete(Long id) {
@@ -117,8 +99,6 @@ public class HotelServiceImpl implements HotelService {
         repo.deleteById(id);
         log.info("Deleted Hotel {}", id);
     }
-
-    /* ── helper ───────────────────────────────────────────────────── */
 
     private EntityNotFoundException notFound(Long id) {
         return new EntityNotFoundException("Hotel " + id + " not found");
