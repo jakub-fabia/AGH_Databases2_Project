@@ -38,6 +38,12 @@ public class HotelServiceImpl implements HotelService {
 
     @Transactional(readOnly = true)
     @Override
+    public Page<Hotel> getAll(Pageable pageable) {
+        return repo.findAll(pageable);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
     public Page<Hotel> list(String country, String city, String name, Integer stars, Pageable pageable) {
         Specification<Hotel> spec = HotelSpecification.filterBy(country, city, name, stars);
         return repo.findAll(spec, pageable);

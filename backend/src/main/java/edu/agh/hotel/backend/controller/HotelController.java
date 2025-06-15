@@ -31,6 +31,16 @@ public class HotelController {
     private final HotelService service;
 
     /**
+     GET: /api/hotels
+     Pobiera listę wszystkich hoteli.
+     */
+
+    @GetMapping("/all")
+    public Page<Hotel> getAll(@ParameterObject Pageable pageable) {
+        return service.getAll(pageable);
+    }
+
+    /**
      GET: /api/hotels/{id}
      * id - required
      Zebranie danych hotelu o podanym id.

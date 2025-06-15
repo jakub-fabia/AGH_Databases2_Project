@@ -12,6 +12,8 @@ import java.util.List;
 
 public interface HotelService {
 
+    Page<Hotel> getAll(Pageable pageable);
+
     Page<Hotel> list(String country, String city, String name, Integer stars, Pageable pageable);
 
     long countAvailableRooms(
