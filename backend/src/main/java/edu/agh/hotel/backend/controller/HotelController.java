@@ -74,7 +74,7 @@ public class HotelController {
     }
 
     /**
-     GET: /api/hotels/{id}/available?checkin={}&checkout={}&roomTypeId={}
+     GET: /api/hotels/{id}/available?checkin={}&checkout={}&roomTypeId={}&minCapacity={}&minPrice={}&maxPrice={}
      * id - required
      * checkin - required
      * checkout - required
@@ -82,7 +82,6 @@ public class HotelController {
      * minCapacity - optional
      * minPrice - optional
      * maxPrice - optional
-     * minCapacity - optional
      * pageable - optional
      Zwraca dostępne pokoje w danym hotelu, między datami zameldowania i wymeldowania. Opcjonalne filtry.
      */
