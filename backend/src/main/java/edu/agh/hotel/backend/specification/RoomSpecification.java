@@ -28,37 +28,29 @@ public class RoomSpecification {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            // subquery to find any overlapping booking_room
+            assert query != null;
             Subquery<Long> sq = query.subquery(Long.class);
             Root<BookingRoom> sub = sq.from(BookingRoom.class);
             sq.select(cb.count(sub));
             sq.where(
                     cb.equal(sub.get("room"), root),
-                    // overlap test: sub.checkin < desiredCheckout
                     cb.lessThan(sub.get("checkinDate"), checkout),
-                    // and sub.checkout > desiredCheckin
                     cb.greaterThan(sub.get("checkoutDate"), checkin)
             );
-            // require that count == 0 => no overlaps
             predicates.add(cb.equal(sq, 0L));
 
-            // 2. Room type
             if (roomTypeId != null) {
                 predicates.add(cb.equal(
                         root.get("roomType").get("id"),
                         roomTypeId
                 ));
             }
-
-            // 3. Capacity >= minCapacity
             if (minCapacity != null) {
                 predicates.add(cb.ge(
                         root.get("capacity").as(Short.class),
                         minCapacity
                 ));
             }
-
-            // 4. Price range
             if (minPrice != null) {
                 predicates.add(cb.ge(
                         root.get("pricePerNight").as(BigDecimal.class),
@@ -71,8 +63,6 @@ public class RoomSpecification {
                         maxPrice
                 ));
             }
-
-            // 5. Hotel attributes: join to Hotel
             Join<Room, Hotel> hotel = root.join("hotel", JoinType.INNER);
             if (hotelCountry != null) {
                 predicates.add(cb.equal(
