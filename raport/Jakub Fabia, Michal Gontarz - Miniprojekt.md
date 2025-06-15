@@ -1,6 +1,6 @@
 # System rezerwacji hotelowych
 
-**Autorzy:** Jakub Fabia · Michał Gontarz
+**Autorzy:** [Jakub Fabia](https://github.com/jakub-fabia) · [Michał Gontarz](https://github.com/gontarsky04)
 
 ---
 
@@ -209,7 +209,7 @@ CREATE TABLE booking (
 
 CREATE TABLE booking_room (
   booking_room_id SERIAL        PRIMARY KEY,
-  booking_id      INT           NOT NULL REFERENCES booking,
+  booking_id      INT,
   room_id         INT           NOT NULL REFERENCES room,
   checkin_date    DATE          NOT NULL,
   checkout_date   DATE          NOT NULL
@@ -390,9 +390,11 @@ Bibliotekami które użyliśmy do utworzenia projektu są:
 - Spring Boot Validation
 - Spring Boot Web
 - Spring Boot DevTools
+- MapStruct
 - Lombok
 
 Wszystie dostępne operacje CRUD zostały zapisane w programie `Postman`.
+
 # Tutaj odnośnik do konfiguracji postmana.
 
 ## 5. Operacje na bazie danych
@@ -551,7 +553,8 @@ public class GlobalExceptionHandler {
 ### `GET /api/bookings/{id}`
 
 **Metoda:** `BookingService.get(Integer id)`
-**Opis:**
+
+**Opis:** 
 Pobiera szczegóły zamówienia o podanym identyfikatorze.
 
 **Parametry:**
@@ -572,7 +575,8 @@ Obiekt `Booking` w formacie JSON / Wiadomość o błędzie
 ### `POST /api/bookings`
 
 **Metoda:** `BookingService.create(BookingCreateRequest request)`
-**Opis:**
+
+**Opis:** 
 Tworzy nowe zamówienie z danych przesłanych w ciele żądania.
 
 **Parametry:**
@@ -616,7 +620,8 @@ Nowo utworzony `Booking` jako JSON / Wiadomość o błędzie
 ### `PUT /api/bookings/{id}`
 
 **Metoda:** `BookingService.update(Integer id, BookingUpdateRequest request)`
-**Opis:**
+
+**Opis:** 
 Aktualizuje istniejące zamówienie na podstawie przekazanych danych.
 
 **Parametry:**
@@ -658,7 +663,8 @@ Zaktualizowany obiekt `Booking` / Wiadomość o błędzie
 ### `PATCH /api/bookings/{id}?status={status}`
 
 **Metoda:** `BookingService.changeStatus(Integer id, BookingStatus status)`
-**Opis:**
+
+**Opis:** 
 Zmienia status istniejącego zamówienia.
 
 **Parametry:**
@@ -698,7 +704,8 @@ Zaktualizowany obiekt `Booking` / Wiadomość o błędzie
 ### `DELETE /api/bookings/{id}`
 
 **Metoda:** `BookingService.delete(Integer id)`
-**Opis:**
+
+**Opis:** 
 Usuwa zamówienie o podanym `id`.
 
 **Parametry:**
@@ -724,7 +731,8 @@ Brak treści (`void`) / Wiadomość o błędzie
 ### `GET /api/guests?firstName={...}&lastName={...}&email={...}&phone={...}`
 
 **Metoda:** `GuestService.list(String firstName, String lastName, String email, String phone, Pageable pageable)`
-**Opis:**
+
+**Opis:** 
 Zwraca paginowaną listę gości na podstawie podanych filtrów (imienia, nazwiska, e-maila i telefonu).
 
 **Parametry:**
@@ -752,7 +760,8 @@ Obiekt `Page<GuestSummary>`, czyli lista gości z paginacją
 ### `GET /api/guests/bookings/{id}`
 
 **Metoda:** `GuestService.getBookings(Integer id)`
-**Opis:**
+
+**Opis:** 
 Zwraca szczegóły gościa o podanym `id`, wraz z jego rezerwacjami i informacjami o pokojach.
 
 **Parametry:**
@@ -787,7 +796,8 @@ Obiekt `Guest` z pełną strukturą rezerwacji
 ### `GET /api/guests/{id}`
 
 **Metoda:** `GuestService.get(Integer id)`
-**Opis:**
+
+**Opis:** 
 Pobiera podstawowe informacje o gościu o podanym `id`, bez rezerwacji.
 
 **Parametry:**
@@ -812,7 +822,8 @@ Obiekt `GuestSummary`
 ### `POST /api/guests`
 
 **Metoda:** `GuestService.create(GuestCreateRequest req)`
-**Opis:**
+
+**Opis:** 
 Tworzy nowego gościa na podstawie danych przesłanych w ciele żądania.
 
 **Parametry:**
@@ -857,7 +868,8 @@ Nowo utworzony obiekt `Guest` jako JSON
 ### `PUT /api/guests/{id}`
 
 **Metoda:** `GuestService.update(Integer id, GuestUpdateRequest req)`
-**Opis:**
+
+**Opis:** 
 Aktualizuje dane istniejącego gościa o podanym `id`.
 
 **Parametry:**
@@ -900,7 +912,8 @@ Zaktualizowany obiekt `Guest`
 ### `DELETE /api/guests/{id}`
 
 **Metoda:** `GuestService.delete(Integer id)`
-**Opis:**
+
+**Opis:** 
 Usuwa gościa o podanym identyfikatorze.
 
 **Parametry:**
@@ -927,7 +940,8 @@ Obiekt `SuccessResponse` z komunikatem usunięcia
 ### `GET /api/hotels/all`
 
 **Metoda:** `HotelService.getAll(Pageable pageable)`
-**Opis:**
+
+**Opis:** 
 Zwraca wszystkie hotele w formie paginowanej, bez żadnych filtrów.
 
 **Parametry:**
@@ -948,10 +962,11 @@ Obiekt `Page<Hotel>`
 
 ---
 
-### `GET /api/hotels`
+### `GET /api/hotels?city={}&country={}&name={}&stars={}`
 
 **Metoda:** `HotelService.list(String country, String city, String name, Integer stars, Pageable pageable)`
-**Opis:**
+
+**Opis:** 
 Zwraca listę hoteli spełniających podane kryteria: kraj, miasto, nazwa, liczba gwiazdek.
 
 **Parametry:**
@@ -978,7 +993,8 @@ Obiekt `Page<Hotel>`
 ### `GET /api/hotels/{id}`
 
 **Metoda:** `HotelService.get(Long id)`
-**Opis:**
+
+**Opis:** 
 Zwraca szczegóły hotelu o podanym identyfikatorze.
 
 **Parametry:**
@@ -1003,7 +1019,8 @@ Obiekt `Hotel`
 ### `GET /api/hotels/{id}/occupancy?date={...}`
 
 **Metoda:** `HotelService.listOccupancy(Long hotelId, LocalDate date)`
-**Opis:**
+
+**Opis:** 
 Zwraca listę rezerwacji z zajętymi pokojami w danym hotelu i danym dniu.
 
 **Parametry:**
@@ -1031,7 +1048,8 @@ Lista obiektów `Booking` z zajętymi pokojami
 ### `GET /api/hotels/{id}/available?checkin={...}&checkout={...}&roomTypeId={...}&minCapacity={...}&minPrice={...}&maxPrice={...}`
 
 **Metoda:** `HotelService.availableRooms(LocalDate checkin, LocalDate checkout, Integer roomTypeId, Short minCapacity, BigDecimal minPrice, BigDecimal maxPrice, Long hotelId, Pageable pageable)`
-**Opis:**
+
+**Opis:** 
 Zwraca `Page `dostępnych pokoji w danym hotelu na zadany przedział czasowy z opcjonalnymi filtrami.
 
 **Parametry:**
@@ -1061,7 +1079,8 @@ Obiekt `Page<Room>`
 ### `POST /api/hotels`
 
 **Metoda:** `HotelService.create(HotelCreateRequest req)`
-**Opis:**
+
+**Opis:** 
 Tworzy nowy hotel na podstawie danych z ciała żądania.
 
 **Parametry:**
@@ -1102,7 +1121,8 @@ Nowy obiekt `Hotel`
 ### `PUT /api/hotels/{id}`
 
 **Metoda:** `HotelService.update(Long id, HotelUpdateRequest req)`
-**Opis:**
+
+**Opis:** 
 Aktualizuje dane hotelu o wskazanym identyfikatorze.
 
 **Parametry:**
@@ -1144,7 +1164,8 @@ Zaktualizowany obiekt `Hotel`
 ### `DELETE /api/hotels/{id}`
 
 **Metoda:** `HotelService.delete(Long id)`
-**Opis:**
+
+**Opis:** 
 Usuwa hotel o podanym `id`.
 
 **Parametry:**
@@ -1173,7 +1194,8 @@ Obiekt `SuccessResponse` z komunikatem
 **Metoda:**
 `RoomService.list(LocalDate checkin, LocalDate checkout, Integer roomTypeId, Short minCapacity, BigDecimal minPrice, BigDecimal maxPrice, String hotelCountry, String hotelCity, String hotelName, Integer hotelStars, Pageable pageable)`
 
-**Opis:**
+
+**Opis:** 
 Zwraca paginowaną listę dostępnych pokoi w zadanym przedziale dat, z opcjonalnym filtrowaniem (typ pokoju, pojemność, cena, lokalizacja, gwiazdki hotelu).
 
 **Parametry:**
@@ -1206,7 +1228,8 @@ Obiekt `Page<Room>`
 **Metoda:**
 `RoomService.isAvailable(Long roomId, LocalDate checkin, LocalDate checkout)`
 
-**Opis:**
+
+**Opis:** 
 Sprawdza, czy dany pokój jest dostępny w określonym przedziale dat.
 
 **Parametry:**
@@ -1237,7 +1260,8 @@ Sprawdza, czy dany pokój jest dostępny w określonym przedziale dat.
 **Metoda:**
 `RoomService.get(Long id)`
 
-**Opis:**
+
+**Opis:** 
 Zwraca szczegóły pokoju o podanym identyfikatorze.
 
 **Parametry:**
@@ -1264,7 +1288,8 @@ Obiekt `Room`
 **Metoda:**
 `RoomService.create(RoomCreateRequest req)`
 
-**Opis:**
+
+**Opis:** 
 Tworzy nowy pokój na podstawie przesłanych danych.
 
 **Parametry:**
@@ -1308,7 +1333,8 @@ Nowy obiekt `Room`
 **Metoda:**
 `RoomService.update(Long id, RoomUpdateRequest req)`
 
-**Opis:**
+
+**Opis:** 
 Aktualizuje dane pokoju o podanym identyfikatorze.
 
 **Parametry:**
@@ -1353,7 +1379,8 @@ Zaktualizowany obiekt `Room`
 **Metoda:**
 `BookingLogRepository.findAll(Specification<BookingLog>, Pageable pageable)`
 
-**Opis:**
+
+**Opis:** 
 Zwraca paginowaną listę logów zmian w rezerwacjach. Można zawęzić wyniki, podając `bookingId`, zakres czasowy (`from`, `to`) oraz `BookingStatus`.
 
 **Parametry:**
@@ -1385,7 +1412,8 @@ Obiekt `Page<BookingLog>`
 **Metoda:**
 `RoomLogRepository.findAll(Specification<RoomLog>, Pageable pageable)`
 
-**Opis:**
+
+**Opis:** 
 Zwraca paginowaną listę logów zmian związanych z pokojami (np. zmiana ceny, pojemności). Można filtrować po identyfikatorze pokoju oraz zakresie czasowym.
 
 **Parametry:**
