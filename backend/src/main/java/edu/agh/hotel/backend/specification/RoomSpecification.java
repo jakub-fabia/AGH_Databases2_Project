@@ -91,4 +91,61 @@ public class RoomSpecification {
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }
+
+    public static Specification<Room> filterBy(
+            LocalDate checkin,
+            LocalDate checkout,
+            Integer roomTypeId,
+            Short minCapacity,
+            BigDecimal minPrice,
+            BigDecimal maxPrice,
+            Long hotelId
+    ) {
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            assert query != null;
+            Subquery<Long> sq = query.subquery(Long.class);
+            Root<BookingRoom> sub = sq.from(BookingRoom.class);
+            sq.select(cb.count(sub));
+            sq.where(
+                    cb.equal(sub.get("room"), root),
+                    cb.lessThan(sub.get("checkinDate"), checkout),
+                    cb.greaterThan(sub.get("checkoutDate"), checkin)
+            );
+            predicates.add(cb.equal(sq, 0L));
+
+            if (roomTypeId != null) {
+                predicates.add(cb.equal(
+                        root.get("roomType").get("id"),
+                        roomTypeId
+                ));
+            }
+            if (minCapacity != null) {
+                predicates.add(cb.ge(
+                        root.get("capacity").as(Short.class),
+                        minCapacity
+                ));
+            }
+            if (minPrice != null) {
+                predicates.add(cb.ge(
+                        root.get("pricePerNight").as(BigDecimal.class),
+                        minPrice
+                ));
+            }
+            if (maxPrice != null) {
+                predicates.add(cb.le(
+                        root.get("pricePerNight").as(BigDecimal.class),
+                        maxPrice
+                ));
+            }
+            if (hotelId != null) {
+                predicates.add(cb.equal(
+                        root.get("hotel").get("id"),
+                        hotelId
+                ));
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+    }
 }

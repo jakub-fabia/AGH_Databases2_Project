@@ -1,8 +1,9 @@
 package edu.agh.hotel.backend.controller;
 
+import edu.agh.hotel.backend.SuccessResponse;
 import edu.agh.hotel.backend.domain.Booking;
 import edu.agh.hotel.backend.domain.Hotel;
-import edu.agh.hotel.backend.SuccessResponse;
+import edu.agh.hotel.backend.domain.Room;
 import edu.agh.hotel.backend.dto.hotel.HotelCreateRequest;
 import edu.agh.hotel.backend.dto.hotel.HotelUpdateRequest;
 import edu.agh.hotel.backend.service.HotelService;
@@ -17,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
@@ -74,21 +76,31 @@ public class HotelController {
     /**
      GET: /api/hotels/{id}/available?checkin={}&checkout={}&roomTypeId={}
      * id - required
-     * checkin - optional
-     * checkout - optional
+     * checkin - required
+     * checkout - required
      * roomTypeId - optional
-     Zwraca ilość dostępnych pokojów w danych hotelu, między datami zameldowania i wymeldowania. Opcjonalnie danego typu.
+     * minCapacity - optional
+     * minPrice - optional
+     * maxPrice - optional
+     * minCapacity - optional
+     * pageable - optional
+     Zwraca dostępne pokoje w danym hotelu, między datami zameldowania i wymeldowania. Opcjonalne filtry.
      */
     @GetMapping("/{id}/available")
-    public long count(
+    public Page<Room> count(
             @PathVariable Long id,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             @FutureOrPresent LocalDate checkin,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             @FutureOrPresent LocalDate checkout,
-            @RequestParam(required = false) Integer roomTypeId
+            @RequestParam(required = false) Integer roomTypeId,
+            @RequestParam(required = false) Short minCapacity,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
+            @ParameterObject Pageable pageable
+
     ) {
-        return service.countAvailableRooms(id, roomTypeId, checkin, checkout);
+        return service.availableRooms(checkin,checkout,roomTypeId,minCapacity,minPrice,maxPrice,id,pageable);
     }
 
     /**

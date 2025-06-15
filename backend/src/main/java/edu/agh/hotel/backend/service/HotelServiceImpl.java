@@ -3,6 +3,7 @@ package edu.agh.hotel.backend.service;
 import edu.agh.hotel.backend.domain.Booking;
 import edu.agh.hotel.backend.domain.BookingRoom;
 import edu.agh.hotel.backend.domain.Hotel;
+import edu.agh.hotel.backend.domain.Room;
 import edu.agh.hotel.backend.dto.hotel.HotelCreateRequest;
 import edu.agh.hotel.backend.dto.hotel.HotelMapper;
 import edu.agh.hotel.backend.dto.hotel.HotelUpdateRequest;
@@ -10,6 +11,7 @@ import edu.agh.hotel.backend.repository.BookingRoomRepository;
 import edu.agh.hotel.backend.repository.HotelRepository;
 import edu.agh.hotel.backend.repository.RoomRepository;
 import edu.agh.hotel.backend.specification.HotelSpecification;
+import edu.agh.hotel.backend.specification.RoomSpecification;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +22,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,8 +53,16 @@ public class HotelServiceImpl implements HotelService {
     }
 
     @Override
-    public long countAvailableRooms(Long hotelId, Integer roomTypeId, LocalDate checkin, LocalDate checkout) {
-        return roomRepository.countAvailable(hotelId, roomTypeId, checkin, checkout);
+    public Page<Room> availableRooms(LocalDate checkin,
+                                          LocalDate checkout,
+                                          Integer roomTypeId,
+                                          Short minCapacity,
+                                          BigDecimal minPrice,
+                                          BigDecimal maxPrice,
+                                          Long hotelId,
+                                          Pageable pageable
+    ){
+        return roomRepository.findAll(RoomSpecification.filterBy(checkin, checkout,roomTypeId,minCapacity,minPrice,maxPrice,hotelId), pageable);
     }
 
     @Override

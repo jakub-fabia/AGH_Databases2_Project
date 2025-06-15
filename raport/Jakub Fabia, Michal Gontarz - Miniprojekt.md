@@ -397,87 +397,205 @@ Wszystie dostępne operacje CRUD zostały zapisane w programie `Postman`.
 
 ## 5. Operacje na bazie danych
 
-### 5.1. Booking
+Wszystkie operacje używają jednej z dwóch adnotacji:
 
-#### GetOne - operacja zebrania szczegółów zamówienia o podanym id
+* `@Transactional(readOnly = true)` – oznacza, że operacja jest atomowa i przeznaczona wyłącznie do odczytu.
+* `@Transactional` – oznacza, że operacja modyfikuje dane w bazie i również jest atomowa.
 
-```
-GET: http://localhost:8080/api/bookings/{{id}}
-```
-Zrealizowana przy pomocy standardowej metody `findById(id)` z `JpaRepository` (Spring Data JPA).
-Wykonuje polecenie:
-```sql
-select
-    b1_0.booking_id,
-    b1_0.created_at,
-    b1_0.guest_id,
-    b1_0.hotel_id,
-    b1_0.status,
-    b1_0.total_price 
-from
-    booking b1_0 
-where
-    b1_0.booking_id=?
-select
-    h1_0.hotel_id,
-    h1_0.address,
-    h1_0.checkin_time,
-    h1_0.checkout_time,
-    h1_0.city,
-    h1_0.country,
-    h1_0.name,
-    h1_0.phone,
-    h1_0.stars 
-from
-    hotel h1_0 
-where
-    h1_0.hotel_id=?
-select
-    br1_0.booking_id,
-    br1_0.booking_room_id,
-    br1_0.checkin_date,
-    br1_0.checkout_date,
-    br1_0.room_id 
-from
-    booking_room br1_0 
-where
-    br1_0.booking_id=?
-select
-    r1_0.room_id,
-    r1_0.capacity,
-    r1_0.hotel_id,
-    r1_0.price_per_night,
-    r1_0.room_number,
-    r1_0.room_type_id 
-from
-    room r1_0 
-where
-    r1_0.room_id=?
-select
-    rt1_0.room_type_id,
-    rt1_0.name 
-from
-    room_type rt1_0 
-where
-    rt1_0.room_type_id=?
-select
-    r1_0.room_id,
-    r1_0.capacity,
-    r1_0.hotel_id,
-    r1_0.price_per_night,
-    r1_0.room_number,
-    r1_0.room_type_id 
-from
-    room r1_0 
-where
-    r1_0.room_id=?
+W dokumentacji, gdy mowa o `...Repository`, chodzi o użycie klas z pakietu `repository`, opartych o:
+
+* `JpaRepository` z biblioteki **Spring Data JPA** – znacznie upraszcza tworzenie zapytań do jednej tabeli,
+* `JpaSpecificationExecutor` z tej samej biblioteki – umożliwia tworzenie dynamicznych filtrów zapytań,
+* `@Query` – stosowane, gdy wymagane jest ręczne zdefiniowanie zapytania SQL (każda taka metoda zostanie opisana przy odpowiednim endpointzie).
+
+Do tworzenia i aktualizacji encji użyto uproszczonych obiektów z pakietu `dto` (Data Transfer Object). Zawierają one tylko niezbędne atrybuty. Znajduje się tam również uproszczona wersja klasy `Guest` wykorzystywana w odpowiedziach.
+
+Obiekty odpowiadające encjom (czyli klasom reprezentującym tabele w bazie danych) znajdują się w pakiecie `domain`.
+
+Krótki opis działania endpointów, wraz z wymaganymi i opcjonalnymi polami, znajduje się przy metodach w pakiecie `controller`.
+
+Pakiet `specification` zawiera definicje filtrów do dynamicznych zapytań.
+
+Pakiet `service` zawiera implementacje operacji, w tym walidację danych.
+
+Walidacja danych może odbywać się na kilku poziomach:
+
+* bezpośrednio w metodach endpointów (`controller`),
+* we wszystkich warstwach pomiędzy kontrolerem a `JpaRepository`,
+* w obiektach encji (`domain`), np. za pomocą adnotacji walidacyjnych.
+
+Obsługa wyjątków, komunikaty błędów oraz odpowiedzi sukcesu są realizowane przez mechanizmy globalne.
+
+---
+
+### `SuccessResponse.java`
+
+```java
+public class SuccessResponse {
+    private final int status;
+    private final String message;
+    private final Instant timestamp;
+
+    public SuccessResponse(int status, String message, Instant timestamp) {
+        this.status = status;
+        this.message = message;
+        this.timestamp = timestamp;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public Instant getTimestamp() {
+        return timestamp;
+    }
+}
 ```
 
-#### Create - Utworzenie nowego zamówienia z jednym lub wieloma pokojami
+### `ErrorResponse.java`
 
+```java
+public class ErrorResponse {
+    private final int status;
+    private final String message;
+    private final Instant timestamp;
+
+    public ErrorResponse(int status, String message, Instant timestamp) {
+        this.status = status;
+        this.message = message;
+        this.timestamp = timestamp;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public Instant getTimestamp() {
+        return timestamp;
+    }
+}
 ```
-CREATE: http://localhost:8080/api/bookings
+
+### `GlobalExceptionHandler.java`
+
+```java
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNotFound(EntityNotFoundException ex) {
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                ex.getMessage(),
+                Instant.now()
+        );
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
+        String message = ex.getBindingResult().getFieldErrors().stream()
+                .map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
+                .collect(Collectors.joining(", "));
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                message,
+                Instant.now()
+        );
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrity(DataIntegrityViolationException ex) {
+        String raw = ex.getMostSpecificCause().getMessage();
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.CONFLICT.value(),
+                raw,
+                Instant.now()
+        );
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalState(IllegalStateException ex) {
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getMessage(),
+                Instant.now()
+        );
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleAll(Exception ex) {
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "Wystąpił nieoczekiwany błąd",
+                Instant.now()
+        );
+        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+}
 ```
+
+---
+
+### `GET /api/bookings/{id}`
+
+**Metoda:** `BookingService.get(Integer id)`
+**Opis:**
+Pobiera szczegóły zamówienia o podanym identyfikatorze.
+
+**Parametry:**
+
+* `id` – identyfikator zamówienia (wymagany)
+
+**Przebieg metody:**
+
+1. Walidacja obecności zamówienia o podanym `id`.
+2. Rzucenie wyjątku `EntityNotFoundException` jeśli nie istnieje.
+3. Zwrócenie obiektu `Booking`.
+
+**Zwraca:**
+Obiekt `Booking` w formacie JSON / Wiadomość o błędzie
+
+---
+
+### `POST /api/bookings`
+
+**Metoda:** `BookingService.create(BookingCreateRequest request)`
+**Opis:**
+Tworzy nowe zamówienie z danych przesłanych w ciele żądania.
+
+**Parametry:**
+
+* `request` – obiekt `BookingCreateRequest` (wymagany)
+
+**Walidacja:**
+
+* Adnotacje walidacyjne w `BookingCreateRequest`, np. `@NotNull`, `@Future`, `@Valid`.
+* Sprawdzenie poprawności danych (np. istnienia klienta, pokoju, dostępności terminu).
+
+**Przebieg metody:**
+
+1. Walidacja pól wejściowych.
+2. Sprawdzenie dostępności zasobów (pokój, daty).
+3. Utworzenie nowego obiektu `Booking` i zapis do bazy.
+4. Zwrócenie utworzonego obiektu.
+
+**Zwraca:**
+Nowo utworzony `Booking` jako JSON / Wiadomość o błędzie
+
+**Przykład JSON (request):**
+
 ```json
 {
     "guestId": "3",
@@ -486,98 +604,43 @@ CREATE: http://localhost:8080/api/bookings
     "bookingRooms": [
         {
             "roomId": "1",
-            "checkinDate": "2025-07-19",
-            "checkoutDate": "2025-07-21"
-        },
-        {
-          "..."
+            "checkinDate": "2025-08-09",
+            "checkoutDate": "2025-08-11"
         }
     ]
 }
 ```
 
-```java
-@Transactional
-@Override
-public Booking create(BookingCreateRequest req) {
-    Booking booking = bookingMapper.toEntity(req);
+---
 
-    Guest guest = guestRepo.findById(req.guestId())
-            .orElseThrow(() -> new EntityNotFoundException("Guest " + req.guestId() + " not found"));
-    booking.setGuest(guest);
+### `PUT /api/bookings/{id}`
 
-    Hotel hotel = hotelRepo.findById(Long.valueOf(req.hotelId()))
-            .orElseThrow(() -> new EntityNotFoundException("Hotel " + req.hotelId() + " not found"));
-    booking.setHotel(hotel);
+**Metoda:** `BookingService.update(Integer id, BookingUpdateRequest request)`
+**Opis:**
+Aktualizuje istniejące zamówienie na podstawie przekazanych danych.
 
-    BigDecimal total = BigDecimal.ZERO;
+**Parametry:**
 
-    for (var brReq : req.bookingRooms()) {
-        Room room = roomRepo.findById(brReq.roomId())
-                .orElseThrow(() -> new EntityNotFoundException("Room " + brReq.roomId() + " not found"));
+* `id` – identyfikator zamówienia (wymagany)
+* `request` – obiekt `BookingUpdateRequest` (wymagany)
 
-        boolean overlap = bookingRoomRepo.existsByRoom_IdAndCheckinDateLessThanAndCheckoutDateGreaterThan(
-                room.getId(),
-                brReq.checkoutDate(),
-                brReq.checkinDate()
-        );
-        if (overlap) {
-            throw new IllegalStateException(
-                    "Room " + room.getId() + " is not available from "
-                            + brReq.checkinDate() + " to " + brReq.checkoutDate()
-            );
-        }
+**Walidacja:**
 
-        long nights = ChronoUnit.DAYS.between(brReq.checkinDate(), brReq.checkoutDate());
-        BigDecimal line = room.getPricePerNight().multiply(BigDecimal.valueOf(nights));
-        total = total.add(line);
+* Adnotacje w `BookingUpdateRequest`.
+* Sprawdzenie spójności dat i dostępności zasobów.
 
-        BookingRoom br = new BookingRoom(booking, room, brReq.checkinDate(), brReq.checkoutDate());
-        booking.addBookingRoom(br);
-    }
-    booking.setCreatedAt(Instant.now());
-    booking.setTotalPrice(total);
-    Booking saved = bookingRepo.save(booking);
-    log.info("Created Booking {} for Guest {}", saved.getId(), guest.getId());
-    return saved;
-}
-```
+**Przebieg metody:**
 
-Gdzie metoda `bookingRoomRepo.existsByRoom_IdAndCheckinDateLessThanAndCheckoutDateGreaterThan` jest też standardowa z `JpaRepository`.
+1. Walidacja istnienia zamówienia.
+2. Walidacja i przetworzenie pól z `BookingUpdateRequest`.
+3. Zmodyfikowanie i zapisanie encji `Booking`.
 
-Wykonuje polecenie:
-```sql
-Hibernate: 
-insert 
-into
-    booking
-    (created_at, guest_id, hotel_id, status, total_price) 
-values
-    (?, ?, ?, ?, ?)
-Hibernate: 
-insert 
-into
-    booking_room
-    (booking_id, checkin_date, checkout_date, room_id) 
-values
-    (?, ?, ?, ?)
-Hibernate: 
-select
-    rt1_0.room_type_id,
-    rt1_0.name 
-from
-    room_type rt1_0 
-where
-    rt1_0.room_type_id=?
-```
+**Zwraca:**
+Zaktualizowany obiekt `Booking` / Wiadomość o błędzie
 
-#### Update - Uaktualnienie istniejącej rezerwacji
+**Przykład JSON (request):**
 
-```
-PUT: http://localhost:8080/api/bookings/{{id}}
-```
 ```json
-{
 {
     "status": "PENDING",
     "bookingRooms": [
@@ -585,21 +648,527 @@ PUT: http://localhost:8080/api/bookings/{{id}}
             "roomId": "1",
             "checkinDate": "2025-07-17",
             "checkoutDate": "2025-07-20"
-        },
-        {
-          "..."
         }
     ]
 }
 ```
 
-### 5.2. Guests
+---
 
-### 5.3. Hotels
+### `PATCH /api/bookings/{id}?status={status}`
 
-### 5.4. Logs
+**Metoda:** `BookingService.changeStatus(Integer id, BookingStatus status)`
+**Opis:**
+Zmienia status istniejącego zamówienia.
 
-### 5.5. Rooms
+**Parametry:**
+
+* `id` – identyfikator zamówienia (wymagany)
+* `status` – nowy status (`BookingStatus`, wymagany)
+
+```java
+public enum BookingStatus {
+    PENDING,
+    CONFIRMED,
+    CANCELLED,
+    CHECKED_IN,
+    COMPLETED
+}
+```
+
+**Walidacja:**
+
+* Sprawdzenie poprawności statusu.
+* Walidacja istnienia zamówienia.
+
+**Przebieg metody:**
+
+1. Znalezienie zamówienia.
+2. Walidacja zmiany stanu (jeśli obowiązują reguły).
+3. Ustawienie nowego statusu i zapis do bazy.
+
+**Zwraca:**
+Zaktualizowany obiekt `Booking` / Wiadomość o błędzie
+
+**Przykład użycia:**
+`PATCH /api/bookings/7?status=CANCELLED`
+
+---
+
+### `DELETE /api/bookings/{id}`
+
+**Metoda:** `BookingService.delete(Integer id)`
+**Opis:**
+Usuwa zamówienie o podanym `id`.
+
+**Parametry:**
+
+* `id` – identyfikator zamówienia (wymagany)
+
+**Walidacja:**
+
+* Sprawdzenie istnienia zamówienia.
+* Możliwa weryfikacja, czy status zamówienia pozwala na usunięcie.
+
+**Przebieg metody:**
+
+1. Sprawdzenie czy zamówienie istnieje.
+2. Ewentualna walidacja reguł (np. brak powiązań uniemożliwiających usunięcie).
+3. Usunięcie rekordu z bazy danych.
+
+**Zwraca:**
+Brak treści (`void`) / Wiadomość o błędzie
+
+---
+
+### `GET /api/guests?firstName={...}&lastName={...}&email={...}&phone={...}`
+
+**Metoda:** `GuestService.list(String firstName, String lastName, String email, String phone, Pageable pageable)`
+**Opis:**
+Zwraca paginowaną listę gości na podstawie podanych filtrów (imienia, nazwiska, e-maila i telefonu).
+
+**Parametry:**
+
+* `firstName`, `lastName`, `email`, `phone` – pola opcjonalne, używane do filtrowania wyników
+* `pageable` – parametry paginacji (`page`, `size`, `sort`)
+
+**Walidacja:**
+
+* Brak wymagań co do obecności parametrów
+* Sprawdzenie poprawności paginacji (Spring robi to automatycznie)
+
+**Przebieg:**
+
+1. Utworzenie specyfikacji filtrującej (`GuestSpecification`)
+2. Pobranie wyników z bazy z użyciem repozytorium
+3. Mapowanie wyników na `GuestSummary`
+4. Zwrócenie strony wyników
+
+**Zwraca:**
+Obiekt `Page<GuestSummary>`, czyli lista gości z paginacją
+
+---
+
+### `GET /api/guests/bookings/{id}`
+
+**Metoda:** `GuestService.getBookings(Integer id)`
+**Opis:**
+Zwraca szczegóły gościa o podanym `id`, wraz z jego rezerwacjami i informacjami o pokojach.
+
+**Parametry:**
+
+* `id` – identyfikator gościa (wymagany)
+
+**Walidacja:**
+
+* Sprawdzenie, czy gość o danym `id` istnieje
+
+**Przebieg:**
+
+1. Wykonanie zapytania `findWithBookingsAndRoomsById`
+```java
+    @Query("""
+      select g
+      from Guest g
+      left join fetch g.bookings b
+      left join fetch b.bookingRooms br
+      where g.id = :id
+      """)
+    Optional<Guest> findWithBookingsAndRoomsById(@Param("id") Integer id);
+```
+2. Rzucenie wyjątku `EntityNotFoundException`, jeśli nie znaleziono
+3. Zwrócenie obiektu `Guest` wraz z jego rezerwacjami i pokojami
+
+**Zwraca:**
+Obiekt `Guest` z pełną strukturą rezerwacji
+
+---
+
+### `GET /api/guests/{id}`
+
+**Metoda:** `GuestService.get(Integer id)`
+**Opis:**
+Pobiera podstawowe informacje o gościu o podanym `id`, bez rezerwacji.
+
+**Parametry:**
+
+* `id` – identyfikator gościa (wymagany)
+
+**Walidacja:**
+
+* Sprawdzenie, czy gość istnieje
+
+**Przebieg:**
+
+1. Pobranie gościa z repozytorium
+2. Rzucenie wyjątku `EntityNotFoundException` w przypadku braku
+3. Mapowanie obiektu `Guest` na `GuestSummary`
+
+**Zwraca:**
+Obiekt `GuestSummary`
+
+---
+
+### `POST /api/guests`
+
+**Metoda:** `GuestService.create(GuestCreateRequest req)`
+**Opis:**
+Tworzy nowego gościa na podstawie danych przesłanych w ciele żądania.
+
+**Parametry:**
+
+* `body` – obiekt JSON typu `GuestCreateRequest` zawierający dane gościa
+
+**Walidacja:**
+
+M.in.:
+* `@NotBlank` dla imienia, nazwiska
+* `@Email` dla adresu e-mail
+* `@Past` dla daty urodzenia
+* Adnotacje sprawdzane automatycznie przez Spring przy `@Valid`
+
+**Przebieg:**
+
+1. Walidacja danych z `GuestCreateRequest`
+2. Przekształcenie DTO na encję `Guest` (mapper)
+3. Zapis gościa w bazie danych
+4. Logowanie operacji
+
+**Zwraca:**
+Nowo utworzony obiekt `Guest` jako JSON
+
+**Przykład JSON (request):**
+
+```json
+{
+  "firstName": "Jakub",
+  "lastName": "Fabia",
+  "dateOfBirth": "2022-12-06",
+  "country": "Polska",
+  "city": "Krakow",
+  "address": "aihbdas",
+  "phone": "23872132",
+  "email": "haelixzas@asibd.asd"
+}
+```
+
+---
+
+### `PUT /api/guests/{id}`
+
+**Metoda:** `GuestService.update(Integer id, GuestUpdateRequest req)`
+**Opis:**
+Aktualizuje dane istniejącego gościa o podanym `id`.
+
+**Parametry:**
+
+* `id` – identyfikator gościa
+* `body` – obiekt JSON typu `GuestUpdateRequest` z danymi do aktualizacji
+
+**Walidacja:**
+
+* Walidacja adnotacjami w `GuestUpdateRequest`
+* Sprawdzenie, czy gość istnieje
+
+**Przebieg:**
+
+1. Pobranie gościa z repozytorium
+2. Walidacja danych wejściowych
+3. Zaktualizowanie pól encji przez mappera
+4. Zapis zmian w ramach transakcji
+
+**Zwraca:**
+Zaktualizowany obiekt `Guest`
+
+**Przykład JSON (request):**
+
+```json
+{
+  "firstName": "Jakub",
+  "lastName": "Fabia",
+  "dateOfBirth": "2022-12-06",
+  "country": "Polska",
+  "city": "Krakow",
+  "address": "aihbdas",
+  "phone": "23872132",
+  "email": "haelixzas@asibd.asd"
+}
+```
+
+---
+
+### `DELETE /api/guests/{id}`
+
+**Metoda:** `GuestService.delete(Integer id)`
+**Opis:**
+Usuwa gościa o podanym identyfikatorze.
+
+**Parametry:**
+
+* `id` – identyfikator gościa
+
+**Walidacja:**
+
+* Sprawdzenie, czy gość istnieje
+* Dodatkowe ograniczenia wymuszone przez DBMS (nieusuwanie gościa z rezerwacjami)
+
+**Przebieg:**
+
+1. Sprawdzenie istnienia rekordu
+2. Usunięcie gościa z bazy
+3. Zalogowanie informacji o operacji
+4. Zwrócenie komunikatu `SuccessResponse`
+
+**Zwraca:**
+Obiekt `SuccessResponse` z komunikatem usunięcia
+
+---
+
+### `GET /api/hotels/all`
+
+**Metoda:** `HotelService.getAll(Pageable pageable)`
+**Opis:**
+Zwraca wszystkie hotele w formie paginowanej, bez żadnych filtrów.
+
+**Parametry:**
+
+* `page`, `size`, `sort` – parametry paginacji (opcjonalne)
+
+**Walidacja:**
+
+* Walidacja formatu parametrów paginacji (realizowana przez Spring)
+
+**Przebieg:**
+
+1. Pobranie wszystkich hoteli z bazy danych przy użyciu repozytorium
+2. Zwrócenie paginowanej listy
+
+**Zwraca:**
+Obiekt `Page<Hotel>`
+
+---
+
+### `GET /api/hotels`
+
+**Metoda:** `HotelService.list(String country, String city, String name, Integer stars, Pageable pageable)`
+**Opis:**
+Zwraca listę hoteli spełniających podane kryteria: kraj, miasto, nazwa, liczba gwiazdek.
+
+**Parametry:**
+
+* `country`, `city`, `name`, `stars` – pola opcjonalne
+* `page`, `size`, `sort` – parametry paginacji
+
+**Walidacja:**
+
+* Brak obowiązkowych pól
+* Spring waliduje typy i paginację
+
+**Przebieg:**
+
+1. Zbudowanie dynamicznej specyfikacji z filtrami (`HotelSpecification`)
+2. Pobranie wyników z bazy danych
+3. Zwrócenie paginowanej listy
+
+**Zwraca:**
+Obiekt `Page<Hotel>`
+
+---
+
+### `GET /api/hotels/{id}`
+
+**Metoda:** `HotelService.get(Long id)`
+**Opis:**
+Zwraca szczegóły hotelu o podanym identyfikatorze.
+
+**Parametry:**
+
+* `id` – identyfikator hotelu (wymagany)
+
+**Walidacja:**
+
+* Sprawdzenie istnienia hotelu
+* Rzucenie `EntityNotFoundException` w przypadku braku
+
+**Przebieg:**
+
+1. Pobranie hotelu z repozytorium
+2. Zwrócenie obiektu
+
+**Zwraca:**
+Obiekt `Hotel`
+
+---
+
+### `GET /api/hotels/{id}/occupancy?date={...}`
+
+**Metoda:** `HotelService.listOccupancy(Long hotelId, LocalDate date)`
+**Opis:**
+Zwraca listę rezerwacji z zajętymi pokojami w danym hotelu i danym dniu.
+
+**Parametry:**
+
+* `id` (ścieżka) – identyfikator hotelu
+* `date` (query) – dzień, którego dotyczy obłożenie
+
+**Walidacja:**
+
+* `@DateTimeFormat` i obecność parametru `date`
+* Sprawdzenie istnienia hotelu
+
+**Przebieg:**
+
+1. Pobranie wszystkich `BookingRoom` pasujących do daty i hotelu
+2. Grupowanie po rezerwacjach
+3. Przypisanie zajętych pokoi do obiektów `Booking`
+4. Zwrócenie listy `Booking`
+
+**Zwraca:**
+Lista obiektów `Booking` z zajętymi pokojami
+
+---
+
+### `GET /api/hotels/{id}/available?checkin={...}&checkout={...}&roomTypeId={...}`
+
+**Metoda:** `HotelService.countAvailableRooms(Long hotelId, Integer roomTypeId, LocalDate checkin, LocalDate checkout)`
+**Opis:**
+Zwraca liczbę dostępnych pokojów w danym hotelu na zadany przedział czasowy, opcjonalnie ograniczoną do typu pokoju.
+
+**Parametry:**
+
+* `id` – identyfikator hotelu
+* `checkin` – data zameldowania
+* `checkout` – data wymeldowania
+* `roomTypeId` – identyfikator typu pokoju (opcjonalny)
+
+**Walidacja:**
+
+* `@FutureOrPresent` dla dat
+* Obowiązkowe `checkin` i `checkout`
+* Sprawdzenie istnienia hotelu
+
+**Przebieg:**
+
+1. Przekazanie parametrów do zapytania w `RoomRepository`
+2. Wyliczenie liczby dostępnych pokojów
+3. Zwrócenie wartości
+
+**Zwraca:**
+Liczba (`long`) dostępnych pokojów
+
+---
+
+### `POST /api/hotels`
+
+**Metoda:** `HotelService.create(HotelCreateRequest req)`
+**Opis:**
+Tworzy nowy hotel na podstawie danych z ciała żądania.
+
+**Parametry:**
+
+* `body` – obiekt `HotelCreateRequest` (JSON)
+
+**Walidacja:**
+
+* Adnotacje w DTO: `@NotBlank`, `@Size`, `@Pattern`, itp.
+* Sprawdzenie poprawności wymaganych pól (nazwa, adres, telefon)
+
+**Przebieg:**
+
+1. Walidacja danych wejściowych
+2. Konwersja DTO na encję (mapper)
+3. Zapis hotelu do bazy
+4. Zwrócenie utworzonego hotelu
+
+**Zwraca:**
+Nowy obiekt `Hotel`
+
+**Przykład JSON (request):**
+
+```json
+{
+  "name": "Hoteal1",
+  "country": "Polska",
+  "city": "Warszawa",
+  "address": "Kawiory 12",
+  "phone": "12411323",
+  "checkinTime": "13:00",
+  "checkoutTime": "10:00"
+}
+```
+
+---
+
+### `PUT /api/hotels/{id}`
+
+**Metoda:** `HotelService.update(Long id, HotelUpdateRequest req)`
+**Opis:**
+Aktualizuje dane hotelu o wskazanym identyfikatorze.
+
+**Parametry:**
+
+* `id` – identyfikator hotelu
+* `body` – obiekt `HotelUpdateRequest` (JSON)
+
+**Walidacja:**
+
+* Walidacja danych z `HotelUpdateRequest`
+* Sprawdzenie istnienia hotelu
+
+**Przebieg:**
+
+1. Pobranie hotelu z repozytorium
+2. Zastosowanie zmian przy użyciu mappera
+3. Zapis zmian w bazie
+
+**Zwraca:**
+Zaktualizowany obiekt `Hotel`
+
+**Przykład JSON (request):**
+
+```json
+{
+  "name": "Hoteal1",
+  "country": "Polska",
+  "city": "Warszawa",
+  "address": "Kawiory 12",
+  "phone": "12411323",
+  "checkinTime": "13:00",
+  "checkoutTime": "10:00",
+  "stars": 3
+}
+```
+
+---
+
+### `DELETE /api/hotels/{id}`
+
+**Metoda:** `HotelService.delete(Long id)`
+**Opis:**
+Usuwa hotel o podanym `id`.
+
+**Parametry:**
+
+* `id` – identyfikator hotelu
+
+**Walidacja:**
+
+* Sprawdzenie, czy hotel istnieje
+* Walidacja przez DBMS (np. czy hotel nie ma aktywnych rezerwacji)
+
+**Przebieg:**
+
+1. Sprawdzenie istnienia hotelu
+2. Usunięcie z bazy
+3. Logowanie operacji
+4. Zwrócenie potwierdzenia w `SuccessResponse`
+
+**Zwraca:**
+Obiekt `SuccessResponse` z komunikatem
+
+---
+
+
 
 ## 6. Możliwości technologii wykorzystanych w projekcie
 
