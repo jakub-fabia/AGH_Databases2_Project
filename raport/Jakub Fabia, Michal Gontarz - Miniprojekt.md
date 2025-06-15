@@ -1,6 +1,10 @@
 # System rezerwacji hotelowych
 
-**Autorzy:** [Jakub Fabia](https://github.com/jakub-fabia) · [Michał Gontarz](https://github.com/gontarsky04)
+**Autorzy:** 
+
+[Jakub Fabia](https://github.com/jakub-fabia)
+
+[Michał Gontarz](https://github.com/gontarsky04)
 
 ---
 
@@ -1464,8 +1468,6 @@ ALTER TABLE booking_room
 
 Ta pojedyncza klauzula zapewnia, że dla danego `room_id` dwa przedziały dat nie mogą się przeciąć.
 
-#### Skutki praktyczne
-
 * Spójność wymuszana już na poziomie bazy – warstwa usług nie musi wykonywać locków ani odpytywać stanu przed insertem.
 * Indeks GiST działa szybko również przy milionach wierszy, bo porównuje tylko potrzebne fragmenty przedziałów.
 
@@ -1480,11 +1482,12 @@ Projekt korzysta z adnotacji `@Getter`, `@Setter`, `@Builder`, `@Data` i kilku i
 
 ---
 
-### 6.4 Spring Data JPA — deklaratywne zapytania i transakcje
+### 6.4 Spring Data JPA — deklaratywne zapytania i **kontrola równoczesnego dostępu do danych**
 
-* Wszystkie repozytoria dziedziczą po `JpaRepository`, a bardziej złożone filtry tworzone są na bieżąco przez `JpaSpecificationExecutor`.
-* Metoda oznaczona `@Transactional` staje się atomowa bez dodatkowego kodu; wystarczy dopisać atrybut `readOnly = true`, aby wymusić wyłącznie SELECT-y.
-* Dzięki temu logika domenowa jest tekstem naturalnym a nie instrukcją SQL; pozostaje czysta i łatwa do testowania.
+* **Mechanizm transakcji (`@Transactional`) jest kluczową warstwą kontroli współbieżności**: każda metoda oznaczona tą adnotacją wykonuje się w ramach jednej transakcji Postgresa, a jeśli w jej trakcie wystąpi konflikt (np. złamanie constraintu GiST + EXCLUDE opis. w pkt 6.2), cała operacja zostaje automatycznie wycofana (rollback).
+* Repozytoria dziedziczą po `JpaRepository`, a bardziej złożone filtry powstają dzięki `JpaSpecificationExecutor`; kod domenowy zawiera bardzo mało ręcznie pisanych `SELECT … FOR UPDATE`, bo to właśnie transakcja + constraint w bazie gwarantują spójność przy wielu równoległych żądaniach.
+* Atrybut `readOnly = true` w `@Transactional` wymusza, że dane metody wykonują wyłącznie odczyty — eliminuje ryzyko przypadkowych zapisów i zmniejsza koszty blokad.
+
 
 ---
 
@@ -1497,6 +1500,8 @@ Zależność `spring-boot-devtools` obserwuje zmianę plików `.class` i restart
 ### 6.6 Postman — powtarzalne testy API
 
 Wszystkie operacje zapisane są w kolekcjach Postmana. Kolekcje pozwalają przetestować działanie endpointów w kontrolowanych warunkach.
+
+---
 
 ### 6.7 Jakarta Bean Validation — walidacja deklaratywna
 
@@ -1519,9 +1524,9 @@ W opisie każdego endpointu CREATE lub PUT pojawia się krok „Konwersja DTO na
 
 Całe środowisko uruchomieniowe zostało rozłożone na trzy odrębne obrazy:
 
-* **backend (Spring Boot)** – osobny kontener, w którym budujemy artefakt `.jar` i uruchamiamy go w lekkim obrazie JDK 24.
-* **frontend (React JS)** – drugi kontener bazujący na Node LTS; w fazie budowania powstaje statyczny bundle, a w fazie uruchomienia serwuje go serwer Nginx.
-* **baza danych (PostgreSQL)** – trzeci kontener oparty na oficjalnym obrazie `postgres:latest`, z dołączonym wolumenem na dane.
+* **backend (Spring Boot)** – osobny kontener, w którym budujemy artefakt projekt i uruchamiamy go w obrazie `JDK 24`.
+* **frontend (React JS)** – drugi kontener bazujący na `Node LTS`; w fazie budowania powstaje statyczny bundle, a w fazie uruchomienia serwuje go serwer `Nginx`.
+* **baza danych (PostgreSQL)** – trzeci kontener oparty na obrazie `postgres:latest`, z dołączonym wolumenem na dane.
 
 ---
 
@@ -1529,9 +1534,4 @@ Całe środowisko uruchomieniowe zostało rozłożone na trzy odrębne obrazy:
 
 Warstwa prezentacji powstała w oparciu o **React** z wykorzystaniem:
 
-* **Vite** jako narzędzia build/development – szybkie HMR i minimalna konfiguracja.
-* **React Router v6** do nawigacji pomiędzy widokami (lista rezerwacji, formularz tworzenia, panel administracyjny).
-* **Axios** do komunikacji z REST-owym API Spring Boot; adres bazowy ustawiany jest przez zmienną środowiskową przekazywaną w `docker-compose.yml`.
-* **Tailwind CSS** (opcjonalnie) dla stylowania komponentów bez konieczności pisania plików `.scss`.
-
-Odseparowanie frontendu w osobnym kontenerze pozwala na niezależny cykl budowania i wdrażania interfejsu – co w praktyce oznacza krótsze czasy deployu i możliwość uruchomienia UI na zupełnie innym serwerze lub CDN-ie, zostawiając backend i bazę wewnątrz sieci prywatnej.
+# Tutaj biblioteki na frontendzie
