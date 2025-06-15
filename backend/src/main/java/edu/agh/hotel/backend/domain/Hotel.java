@@ -17,17 +17,11 @@ import java.util.Objects;
 @Entity
 @Table(name = "hotel")
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
-
 public class Hotel {
-
-    /* ---------- Primary key ---------- */
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "hotel_id")
     private Integer id;
-
-    /* ---------- Required columns ---------- */
 
     @NotBlank
     @Size(max = 255)

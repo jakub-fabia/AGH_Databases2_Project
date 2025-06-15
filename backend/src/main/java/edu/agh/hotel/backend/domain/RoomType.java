@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 
 import java.util.Objects;
 
-
 @Data
 @NoArgsConstructor
 @Entity
@@ -20,28 +19,19 @@ import java.util.Objects;
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 
 public class RoomType {
-
-    /* ---------- Primary key ---------- */
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "room_type_id")
     private Integer id;
-
-    /* ---------- Fields ---------- */
 
     @NotBlank
     @Size(max = 50)
     @Column(name = "name", nullable = false, length = 50)
     private String name;
 
-    /* ---------- Constructors ---------- */
-
     public RoomType(String name) {
         this.name = name;
     }
-
-    /* ---------- Equality (by id) ---------- */
 
     @Override
     public boolean equals(Object o) {

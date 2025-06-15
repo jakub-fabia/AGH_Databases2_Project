@@ -20,18 +20,10 @@ import java.util.Set;
 @Table(name = "booking")
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class Booking {
-
-    /* ---------- Primary key ---------- */
     @Id
-    @JsonIdentityInfo(
-            generator = ObjectIdGenerators.PropertyGenerator.class,
-            property = "id"
-    )
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "booking_id")
     private Integer id;
-
-    /* ---------- Relationships ---------- */
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -44,10 +36,8 @@ public class Booking {
     @JoinColumn(name = "hotel_id", nullable = false)
     private Hotel hotel;
 
-    /* ---------- Fields ---------- */
-
     @NotNull
-    @DecimalMin(value = "0.01", inclusive = true)
+    @DecimalMin(value = "0.01")
     @Column(name = "total_price", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalPrice;
 
@@ -69,9 +59,6 @@ public class Booking {
     @JsonManagedReference
     private Set<BookingRoom> bookingRooms = new HashSet<>();
 
-
-    /* ---------- Constructors ---------- */
-
     public Booking(Guest guest,
                    Hotel hotel,
                    BigDecimal totalPrice,
@@ -86,8 +73,6 @@ public class Booking {
         bookingRooms.add(bookingRoom);
         bookingRoom.setBooking(this);
     }
-
-    /* ---------- Equality (by id) ---------- */
 
     @Override
     public boolean equals(Object o) {

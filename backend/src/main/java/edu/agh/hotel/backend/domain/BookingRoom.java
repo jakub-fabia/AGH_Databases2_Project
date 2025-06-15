@@ -1,11 +1,8 @@
 package edu.agh.hotel.backend.domain;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,21 +17,11 @@ import java.util.Objects;
 @Table(name = "booking_room")
 @Check(constraints = "checkout_date > checkin_date")
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
-
 public class BookingRoom {
-
-    /* ---------- Primary key ---------- */
-
     @Id
-    @JsonIdentityInfo(
-            generator = ObjectIdGenerators.PropertyGenerator.class,
-            property = "id"
-    )
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "booking_room_id")
     private Integer id;
-
-    /* ---------- Relationships ---------- */
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -47,8 +34,6 @@ public class BookingRoom {
     @JoinColumn(name = "room_id", nullable = false)
     private Room room;
 
-    /* ---------- Fields ---------- */
-
     @NotNull
     @Column(name = "checkin_date", nullable = false)
     private LocalDate checkinDate;
@@ -56,8 +41,6 @@ public class BookingRoom {
     @NotNull
     @Column(name = "checkout_date", nullable = false)
     private LocalDate checkoutDate;
-
-    /* ---------- Constructors ---------- */
 
     public BookingRoom(Booking booking,
                        Room room,
@@ -68,21 +51,6 @@ public class BookingRoom {
         this.checkinDate  = checkinDate;
         this.checkoutDate = checkoutDate;
     }
-
-    /* ---------- Cross-field validation ---------- */
-
-    /**
-     * Enforces that checkoutDate is strictly after checkinDate.
-     * This complements the database CHECK constraint.
-     */
-    @AssertTrue(message = "Checkout date must be after check-in date")
-    @Transient
-    public boolean isCheckoutAfterCheckin() {
-        if (checkinDate == null || checkoutDate == null) return true;
-        return checkoutDate.isAfter(checkinDate);
-    }
-
-    /* ---------- Equality (by id) ---------- */
 
     @Override
     public boolean equals(Object o) {

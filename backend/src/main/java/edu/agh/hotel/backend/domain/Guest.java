@@ -18,61 +18,47 @@ import java.util.Set;
 @Table(name = "guest")
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class Guest {
-
-    /* ---------- Primary key ---------- */
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "guest_id")
-    
     private Integer id;
-
-    /* ---------- Required fields ---------- */
 
     @NotBlank
     @Size(max = 50)
     @Column(name = "first_name", nullable = false, length = 50)
-    
     private String firstName;
 
     @NotBlank
     @Size(max = 50)
     @Column(name = "last_name", nullable = false, length = 50)
-    
     private String lastName;
 
     @NotNull
     @Past
     @Column(name = "date_of_birth", nullable = false)
-    
     private LocalDate dateOfBirth;
 
     @NotBlank
     @Size(max = 30)
     @Column(nullable = false, length = 30)
-    
     private String country;
 
     @NotBlank
     @Size(max = 30)
     @Column(nullable = false, length = 30)
-    
     private String city;
 
     @NotBlank
     @Column(nullable = false, columnDefinition = "text")
-    
     private String address;
 
     @Size(max = 20)
     @Column(length = 20)
-    
     private String phone;
 
     @Email
     @Size(max = 255)
-    @Column(length = 255)
-    
+    @Column
     private String email;
 
     @OneToMany(
@@ -81,9 +67,7 @@ public class Guest {
         orphanRemoval = true
     )
     @JsonManagedReference
-    
     private Set<Booking> bookings = new HashSet<>();
-
 
     public Guest(String firstName, String lastName, LocalDate dateOfBirth,
                  String country, String city, String address,

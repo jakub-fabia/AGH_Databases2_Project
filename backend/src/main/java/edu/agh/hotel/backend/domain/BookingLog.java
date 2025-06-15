@@ -15,7 +15,6 @@ import java.time.Instant;
 @Table(name = "booking_log")
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class BookingLog {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "booking_log_id")
@@ -36,9 +35,6 @@ public class BookingLog {
     @Column(name = "status", nullable = false, length = 11)
     private BookingStatus status;
 
-    /**
-     * Raw JSON blob of the rooms snapshot at the time of logging.
-     */
     @Column(name = "booking_rooms", nullable = false, columnDefinition = "jsonb")
     private String bookingRooms;
 }

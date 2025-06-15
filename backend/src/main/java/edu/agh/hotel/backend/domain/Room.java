@@ -20,16 +20,10 @@ import java.util.Objects;
 @Check(constraints = "price_per_night > 0 AND capacity > 0")
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class Room {
-
-    /* ---------- Primary key ---------- */
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "room_id")
-    
     private Integer id;
-
-    /* ---------- Relationships ---------- */
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -39,29 +33,21 @@ public class Room {
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "room_type_id", nullable = false)
-    
     private RoomType roomType;
-
-    /* ---------- Fields ---------- */
 
     @NotBlank
     @Size(max = 10)
     @Column(name = "room_number", nullable = false, length = 10)
-    
     private String roomNumber;
 
     @Min(1)
     @Column(nullable = false)
-    
     private Short capacity;
 
     @NotNull
     @DecimalMin(value = "0.0", inclusive = false)
     @Column(name = "price_per_night", nullable = false, precision = 10, scale = 2)
-    
     private BigDecimal pricePerNight;
-
-    /* ---------- Constructors ---------- */
 
     public Room(Hotel hotel,
                 RoomType roomType,
@@ -75,8 +61,6 @@ public class Room {
         this.pricePerNight = pricePerNight;
     }
 
-    /* ---------- Equality (by id) ---------- */
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -89,4 +73,3 @@ public class Room {
         return Objects.hashCode(id);
     }
 }
-

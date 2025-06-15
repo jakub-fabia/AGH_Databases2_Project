@@ -15,7 +15,6 @@ import java.time.Instant;
 @Table(name = "room_log")
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class RoomLog {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "room_log_id")
