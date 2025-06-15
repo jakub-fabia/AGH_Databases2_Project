@@ -25,7 +25,7 @@ Kompletne definicje SQL znajdują się w pliku [`sql/tables.sql`](./sql/tables
 | name          | VARCHAR **NOT NULL** |                              | Nazwa obiektu widoczna w ofercie           |
 | country       | VARCHAR **NOT NULL** |                              | Kraj                                       |
 | city          | VARCHAR **NOT NULL** |                              | Miasto / miejscowość                       |
-| stars         | SMALLINT             | NULL OR 1 ≤ stars ≤ 5        | Oficjalna kategoryzacja (1–5★)             |                   |
+| stars         | SMALLINT             | NULL OR 1 ≤ stars ≤ 5        | Oficjalna kategoryzacja (1–5★)             |
 | address       | TEXT **NOT NULL**    |                              | Ulica + nr domu/mieszkania                 |
 | phone         | VARCHAR **NOT NULL** | UNIQUE                       | Telefon recepcji                           |
 | checkin_time  | TIME **NOT NULL**    | checkin_time > checkout_time | Standardowa godzina zameldowania           |
@@ -51,14 +51,14 @@ Kompletne definicje SQL znajdują się w pliku [`sql/tables.sql`](./sql/tables
 
 > Każda fizyczna jednostka noclegowa (konkretny pokój 101, domek 5, łóżko #4 w hostelu).
 
-| Kolumna     | Typ                      | Klucz / ograniczenia                  | Znaczenie                       |
-| ----------- | ------------------------ | ------------------------------------- | ------------------------------- |
-| room_id     | SERIAL                   | **PK**                                | Identyfikator pokoju            |
-| hotel_id    | INT   **NOT NULL**       | FK części skł. PK → `hotel` | Hotel, do którego należy pokój  |
-| room_type_id     | INT   **NOT NULL**       | FK części skł. PK → `room_type` | Kategoria pokoju |
-| room_number | VARCHAR **NOT NULL**     | UNIQUE(hotel_id, room_number)         | Numer "jednostki noclegowej"    |
-| capacity    | SMALLINT **NOT NULL** | capacity > 0         | Liczba osób, które można zakwaterować           |
-| price_per_night | NUMERIC **NOT NULL**  | price > 0                | Aktualna cena za noc               |
+| Kolumna         | Typ                      | Klucz / ograniczenia                  | Znaczenie                             |
+| --------------- | ------------------------ | ------------------------------------- | -------------------------------       |
+| room_id         | SERIAL                   | **PK**                                | Identyfikator pokoju                  |
+| hotel_id        | INT   **NOT NULL**       | FK części skł. PK → `hotel`           | Hotel, do którego należy pokój        |
+| room_type_id    | INT   **NOT NULL**       | FK części skł. PK → `room_type`       | Kategoria pokoju                      |
+| room_number     | VARCHAR **NOT NULL**     | UNIQUE(hotel_id, room_number)         | Numer "jednostki noclegowej"          |
+| capacity        | SMALLINT **NOT NULL**    | capacity > 0                          | Liczba osób, które można zakwaterować |
+| price_per_night | NUMERIC **NOT NULL**     | price > 0                             | Aktualna cena za noc                  |
 ---
 
 <div style="page-break-after: always;"></div>
@@ -67,12 +67,12 @@ Kompletne definicje SQL znajdują się w pliku [`sql/tables.sql`](./sql/tables
 
 > Historia zmian statusu dla każdego pokoju (dla raportów o poszczególnych pokojach).
 
-| Kolumna       | Typ           | Klucz / ograniczenia | Znaczenie                     |
-| ------------- | ------------- | -------------------- | ----------------------------- |
-| room_log_id   | SERIAL        | **PK**               | Klucz sztuczny                |
-| room_id       | INT           | FK → `room`          | Obiekt, którego dotyczy wpis  |
-| created_at    | TIMESTAMPTZ   | DEFAULT now()        | Znacznik czasu zmiany         |
-| price_per_night | NUMERIC **NOT NULL**  | price > 0                | Aktualna cena za noc  
+| Kolumna         | Typ                   | Klucz / ograniczenia     | Znaczenie                     |
+| --------------- | --------------------- | ------------------------ | ----------------------------- |
+| room_log_id     | SERIAL                | **PK**                   | Klucz sztuczny                |
+| room_id         | INT                   | FK → `room`              | Obiekt, którego dotyczy wpis  |
+| created_at      | TIMESTAMPTZ           | DEFAULT now()            | Znacznik czasu zmiany         |
+| price_per_night | NUMERIC **NOT NULL**  | price > 0                | Aktualna cena za noc          |
 
 ---
 
@@ -87,8 +87,8 @@ Kompletne definicje SQL znajdują się w pliku [`sql/tables.sql`](./sql/tables
 | guest_id               | SERIAL               | **PK**                  | Identyfikator gościa       |
 | first_name / last_name | VARCHAR **NOT NULL** |                         | Imię i nazwisko            |
 | date_of_birth          | DATE **NOT NULL**    | date_of_birth < today   | Data urodzenia             |
-| country         | VARCHAR **NOT NULL** |                         | Kraj zamieszkania        |
-| city         | VARCHAR **NOT NULL** |                         | Miasto zamieszkania        |
+| country                | VARCHAR **NOT NULL** |                         | Kraj zamieszkania          |
+| city                   | VARCHAR **NOT NULL** |                         | Miasto zamieszkania        |
 | address                | TEXT **NOT NULL**    |                         | Ulica + nr domu/mieszkania |
 | phone                  | VARCHAR              | UNIQUE                  | Telefon kontaktowy         |
 | email                  | VARCHAR              | UNIQUE                  | E‑mail                     |
@@ -102,13 +102,13 @@ Kompletne definicje SQL znajdują się w pliku [`sql/tables.sql`](./sql/tables
 
 > Nagłówek rezerwacji (dane wspólne dla wszystkich pokoi w jednym zamówieniu).
 
-| Kolumna                      | Typ                  | Klucz / ograniczenia       | Znaczenie                      |
-| ---------------------------- | -------------------- | -------------------------- | ------------------------------ |
-| booking_id                   | SERIAL               | **PK**                     | Identyfikator zamówienia       |
-| guest_id                     | INT   **NOT NULL**   | FK → `guest`               |                                |
-| hotel_id    | INT   **NOT NULL**       | FK części skł. PK → `hotel` | Hotel, do którego należy pokój  |
-| total_price                  | NUMERIC **NOT NULL** | total_price > 0            | Kwota za całe zamówienie       |
-| status                       | VARCHAR **NOT NULL** | DEFAULT 'PENDING'          | Aktualny status rezerwacji     |
+| Kolumna                      | Typ                      | Klucz / ograniczenia       | Znaczenie                      |
+| ---------------------------- | ------------------------ | -------------------------- | ------------------------------ |
+| booking_id                   | SERIAL                   | **PK**                     | Identyfikator zamówienia       |
+| guest_id                     | INT   **NOT NULL**       | FK → `guest`               |                                |
+| hotel_id                     | INT   **NOT NULL**       | FK części skł. PK → `hotel`| Hotel, do którego należy pokój |
+| total_price                  | NUMERIC **NOT NULL**     | total_price > 0            | Kwota za całe zamówienie       |
+| status                       | VARCHAR **NOT NULL**     | DEFAULT 'PENDING'          | Aktualny status rezerwacji     |
 | created_at                   | TIMESTAMPTZ **NOT NULL** | DEFAULT now()              | Data utworzenia rezerwacji     |
 
 ---
@@ -119,13 +119,13 @@ Kompletne definicje SQL znajdują się w pliku [`sql/tables.sql`](./sql/tables
 
 > Szczegóły rezerwacji — które pokoje wchodzą w skład jednego `booking` i z jakimi dodatkami.
 
-| Kolumna       | Typ                  | Klucz / ograniczenia  | Znaczenie                             |
-| ------------- | -------------------- | --------------------- | ------------------------------------- |
-| booking_room_id    | SERIAL                  | **PK** fk → `booking` |                                       |
-| booking_id       | INT **NOT NULL**             | FK część skł. PK -> `booking'     |                      Identyfikator zamówienia |
-| room_id | INT **NOT NULL**    | FK część skł. PK -> `room`    | Rezerwowany pokój          |
-| checkin_date  | DATE **NOT NULL**    | checkout > checkin    | Data zameldowania                     |
-| checkout_date | DATE **NOT NULL**    | checkout > checkin    | Data wymeldowania                     |
+| Kolumna          | Typ                  | Klucz / ograniczenia          | Znaczenie                |
+| ---------------- | -------------------- | ----------------------------- | ------------------------ |
+| booking_room_id  | INT                  | **PK** fk → `booking`         |                          |
+| booking_id       | INT                  | FK część skł. PK -> `booking' | Identyfikator zamówienia |
+| room_id          | INT **NOT NULL**     | FK część skł. PK -> `room`    | Rezerwowany pokój        |
+| checkin_date     | DATE **NOT NULL**    | checkout > checkin            | Data zameldowania        |
+| checkout_date    | DATE **NOT NULL**    | checkout > checkin            | Data wymeldowania        |
 ---
 
 <div style="page-break-after: always;"></div>
@@ -134,14 +134,14 @@ Kompletne definicje SQL znajdują się w pliku [`sql/tables.sql`](./sql/tables
 
 > Migawka zmian rezerwacji obejmująca główne pola oraz listę pokojów (w formacie JSON).
 
-| Kolumna                      | Typ            | Klucz / ograniczenia  | Znaczenie                                                                |
-| ---------------------------- | -------------- | --------------------- | ------------------------------------------------------------------------ |
-| booking_log_id               | SERIAL         | **PK**                |                                                                          |
-| booking_id                   | INT **NOT NULL**           | FK → `booking`        |                                                                          |
-| created_at                   | TIMESTAMPTZ **NOT NULL**   | DEFAULT now()         |                                                                          |
-| total_price                  | NUMERIC **NOT NULL** | total_price > 0            | Kwota za całe zamówienie       |
-| status                       | VARCHAR **NOT NULL**        |                       | Nowy status zamówienia                                                   |
-| booking_rooms                | JSONB **NOT NULL**         |                       | Nowe szczegóły zamówienia w formie `{room_id, checkin, checkout}` |
+| Kolumna         | Typ                  | Klucz / ograniczenia  | Znaczenie                                                         |
+| --------------- | -------------------- | --------------------- | ----------------------------------------------------------------- |
+| booking_log_id  | SERIAL               | **PK**                |                                                                   |
+| booking_id      | INT                  | FK → `booking`        |                                                                   |
+| created_at      | TIMESTAMPTZ          | DEFAULT now()         |                                                                   |
+| total_price     | NUMERIC **NOT NULL** | total_price > 0       | Kwota za całe zamówienie                                          |
+| status          | VARCHAR              |                       | Nowy status zamówienia                                            |
+| booking_rooms   | JSONB                |                       | Nowe szczegóły zamówienia w formie `{room_id, checkin, checkout}` |
 
 ---
 
@@ -375,6 +375,61 @@ FOR EACH ROW
 EXECUTE FUNCTION check_booking_rooms_same_hotel();
 ```
 ---
+
+## 4. Framework do obsługi bazy danych i endpointów
+
+Frameworkiem na jaki zdecydowaliśmy się do realizacji projektu jest Java Spring Boot. 
+Bibliotekami które użyliśmy do utworzenia projektu są:
+- Spring Boot Data JPA
+- Spring Boot Validation
+- Spring Boot Web
+- Spring Boot DevTools
+- Lombok
+
+### 4.1. Struktura plików źródłowych
+
+Ze względu na liczbę oraz rozmiar każdego pliku, w sprawozdaniu omówimy tylko strukturę oraz któtko opiszemy co jest czym w projekcie. Pliki programu są skategoryzowane na 7 pakietów.
+
+#### 4.1.1. domain
+
+Klasy w tym katalogu to encje z każdej tabeli oraz enum `BookingStatus`.
+
+```java
+public enum BookingStatus {
+    PENDING,
+    CONFIRMED,
+    CANCELLED,
+    CHECKED_IN,
+    COMPLETED
+}
+```
+
+Każda klasa wygląda bardzo podobnie. Tutaj przykład, początek klasy `Guest`:
+
+```java
+@Data
+@NoArgsConstructor
+@Entity
+@Table(name = "guest")
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
+public class Guest {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "guest_id")
+    private Integer id;
+
+    @NotBlank
+    @Size(max = 50)
+    @Column(name = "first_name", nullable = false, length = 50)
+    private String firstName;
+    
+    /* Dalszy kod... */
+}
+```
+
+#### 4.1.2. dto
+
+Obiekty w tym katalogu to rekordy 
 
 
 ## 6. Możliwości technologii wykorzystanych w projekcie
