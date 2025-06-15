@@ -13,6 +13,9 @@ function HotelPage() {
     const [availableRooms, setAvailableRooms] = useState([]);
     const [searchError, setSearchError] = useState('');
     const [searching, setSearching] = useState(false);
+    const [minCapacity, setMinCapacity] = useState('');
+    const [minPrice, setMinPrice] = useState('');
+    const [maxPrice, setMaxPrice] = useState('');
 
     useEffect(() => {
         fetch(`http://localhost:8080/api/hotels/${id}`)
@@ -41,13 +44,25 @@ function HotelPage() {
         if (roomTypeId.trim()) {
             params.append('roomTypeId', roomTypeId);
         }
+        if (roomTypeId.trim()) {
+            params.append('roomTypeId', roomTypeId);
+        }
+        if (minCapacity.trim()) {
+            params.append('minCapacity', minCapacity);
+        }
+        if (minPrice.trim()) {
+            params.append('minPrice', minPrice);
+        }
+        if (maxPrice.trim()) {
+            params.append('maxPrice', maxPrice);
+        }
 
         fetch(`http://localhost:8080/api/hotels/${id}/available?${params.toString()}`)
             .then(res => {
                 if (!res.ok) throw new Error("Błąd pobierania dostępnych pokoi.");
                 return res.json();
             })
-            .then(setAvailableRooms)
+            .then(data => setAvailableRooms(data.content)) // <=== TUTAJ
             .catch(err => {
                 console.error(err);
                 setAvailableRooms([]);
@@ -55,6 +70,7 @@ function HotelPage() {
             })
             .finally(() => setSearching(false));
     };
+
 
     if (loading) return <p>⏳ Ładowanie...</p>;
     if (error) return <p>❌ Błąd: {error.message}</p>;
@@ -100,12 +116,48 @@ function HotelPage() {
                             className="border p-2 rounded"
                         />
                     </div>
+
+                    <div className="flex flex-col">
+                        <label>Minimalna pojemność (opcjonalnie)</label>
+                        <input
+                            type="number"
+                            value={minCapacity}
+                            onChange={e => setMinCapacity(e.target.value)}
+                            className="border p-2 rounded"
+                            min={1}
+                        />
+                    </div>
+
+                    <div className="flex flex-col">
+                        <label>Minimalna cena (opcjonalnie)</label>
+                        <input
+                            type="number"
+                            value={minPrice}
+                            onChange={e => setMinPrice(e.target.value)}
+                            className="border p-2 rounded"
+                            min={0}
+                            step={1}
+                        />
+                    </div>
+
+                    <div className="flex flex-col">
+                        <label>Maksymalna cena (opcjonalnie)</label>
+                        <input
+                            type="number"
+                            value={maxPrice}
+                            onChange={e => setMaxPrice(e.target.value)}
+                            className="border p-2 rounded"
+                            min={0}
+                            step={1}
+                        />
+                    </div>
                     <button
                         onClick={handleSearch}
                         className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
                     >
                         Szukaj pokoi
                     </button>
+
                     {searchError && <p className="text-red-600">{searchError}</p>}
                 </div>
 
@@ -118,9 +170,10 @@ function HotelPage() {
                             <ul className="space-y-2">
                                 {availableRooms.map(room => (
                                     <li key={room.id} className="border p-3 rounded shadow">
-                                        <p><strong>Numer:</strong> {room.number}</p>
-                                        <p><strong>Typ:</strong> {room.roomTypeName}</p>
-                                        <p><strong>Cena:</strong> {room.price} zł / noc</p>
+                                        <p><strong>Numer pokoju:</strong> {room.roomNumber}</p>
+                                        <p><strong>Typ:</strong> {room.roomType?.name}</p>
+                                        <p><strong>Pojemność:</strong> {room.capacity} os.</p>
+                                        <p><strong>Cena:</strong> {room.pricePerNight} zł / noc</p>
                                     </li>
                                 ))}
                             </ul>
