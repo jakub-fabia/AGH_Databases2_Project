@@ -54,12 +54,6 @@ public class RoomController {
             @RequestParam(required = false) Integer hotelStars,
             Pageable pageable
     ) {
-        if (!checkin.isBefore(checkout)) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "checkout date must be at least one day after checkin"
-            );
-        }
         return roomService.list(
                 checkin, checkout,
                 roomTypeId, minCapacity,
@@ -130,4 +124,3 @@ public class RoomController {
         return roomService.update(id, request);
     }
 }
-

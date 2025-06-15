@@ -2,16 +2,17 @@ package edu.agh.hotel.backend.service;
 
 import edu.agh.hotel.backend.domain.Guest;
 import edu.agh.hotel.backend.dto.guest.GuestCreateRequest;
+import edu.agh.hotel.backend.dto.guest.GuestSummary;
 import edu.agh.hotel.backend.dto.guest.GuestUpdateRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface GuestService {
-    Page<Guest> list(String firstName, String lastName, String email, String phone, Pageable pageable);
+    Page<GuestSummary> list(String firstName, String lastName, String email, String phone, Pageable pageable);
 
     Guest getBookings(Integer id);
 
-    Guest get(Integer id);
+    GuestSummary get(Integer id);
 
     Guest create(GuestCreateRequest request);
 

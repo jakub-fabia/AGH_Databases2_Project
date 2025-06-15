@@ -1,7 +1,7 @@
 package edu.agh.hotel.backend.controller;
 
-import edu.agh.hotel.backend.domain.Guest;
 import edu.agh.hotel.backend.SuccessResponse;
+import edu.agh.hotel.backend.domain.Guest;
 import edu.agh.hotel.backend.dto.guest.GuestCreateRequest;
 import edu.agh.hotel.backend.dto.guest.GuestSummary;
 import edu.agh.hotel.backend.dto.guest.GuestUpdateRequest;
@@ -9,13 +9,13 @@ import edu.agh.hotel.backend.service.GuestService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/guests")
@@ -33,26 +33,13 @@ public class GuestController {
      Szukanie gościa o podanych danych.
      */
     @GetMapping
-    public List<GuestSummary> list(
+    public Page<GuestSummary> list(
             @RequestParam(required = false) String firstName,
             @RequestParam(required = false) String lastName,
             @RequestParam(required = false) String email,
             @RequestParam(required = false) String phone,
             @ParameterObject Pageable pageable) {
-
-        return service.list(firstName, lastName, email, phone, pageable)
-                .map(g -> new GuestSummary(
-                        g.getId(),
-                        g.getFirstName(),
-                        g.getLastName(),
-                        g.getDateOfBirth(),
-                        g.getCountry(),
-                        g.getCity(),
-                        g.getAddress(),
-                        g.getPhone(),
-                        g.getEmail()
-                ))
-                .getContent();
+        return service.list(firstName, lastName, email, phone, pageable);
     }
 
     /**
@@ -72,18 +59,7 @@ public class GuestController {
      */
     @GetMapping("/{id}")
     public GuestSummary get(@PathVariable Integer id) {
-        Guest g = service.get(id);
-        return new GuestSummary(
-                g.getId(),
-                g.getFirstName(),
-                g.getLastName(),
-                g.getDateOfBirth(),
-                g.getCountry(),
-                g.getCity(),
-                g.getAddress(),
-                g.getPhone(),
-                g.getEmail()
-        );
+        return service.get(id);
     }
 
     /**

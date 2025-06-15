@@ -17,8 +17,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -50,6 +52,12 @@ public class RoomServiceImpl implements RoomService {
             Integer hotelStars,
             Pageable pageable
     ) {
+        if (!checkin.isBefore(checkout)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "checkout date must be at least one day after checkin"
+            );
+        }
         return roomRepo.findAll(
                 RoomSpecification.filterBy(
                         checkin, checkout,

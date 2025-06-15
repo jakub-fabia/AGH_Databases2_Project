@@ -33,7 +33,7 @@ public class GuestServiceImpl implements GuestService {
 
     @Transactional(readOnly = true)
     @Override
-    public Page<Guest> list(String firstName, String lastName, String email, String phone, Pageable pageable) {
+    public Page<GuestSummary> list(String firstName, String lastName, String email, String phone, Pageable pageable) {
         Specification<Guest> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             if (firstName != null) {
@@ -65,14 +65,16 @@ public class GuestServiceImpl implements GuestService {
             }
             return cb.and(predicates.toArray(new Predicate[0]));
         };
-        return repo.findAll(spec, pageable);
+        Page<Guest> g = repo.findAll(spec, pageable);
+        return g.map(mapper::toSummary);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public Guest get(Integer id) {
-        return repo.findById(id)
+    public GuestSummary get(Integer id) {
+        Guest g = repo.findById(id)
                 .orElseThrow(() -> notFound(id));
+        return mapper.toSummary(g);
     }
 
     @Transactional(readOnly = true)
