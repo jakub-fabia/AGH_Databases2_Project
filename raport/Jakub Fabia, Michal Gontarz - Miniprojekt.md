@@ -259,7 +259,7 @@ ALTER TABLE guest
 
 ALTER TABLE booking
   ADD CHECK (total_price > 0),
-  ADD CHECK (status IN ('PENDING', 'CONFIRMED', 'CANCELLED', 'CHECKED IN', 'COMPLETED'));
+  ADD CHECK (status IN ('PENDING', 'CONFIRMED', 'CANCELLED', 'CHECKED_IN', 'COMPLETED'));
 
 ALTER TABLE booking_room
   ADD CHECK (checkout_date > checkin_date);
