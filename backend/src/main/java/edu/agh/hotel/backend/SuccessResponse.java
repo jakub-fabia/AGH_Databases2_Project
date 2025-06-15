@@ -1,4 +1,4 @@
-package edu.agh.hotel.backend.dto;
+package edu.agh.hotel.backend;
 
 import java.time.Instant;
 

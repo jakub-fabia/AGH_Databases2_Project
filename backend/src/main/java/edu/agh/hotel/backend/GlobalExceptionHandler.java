@@ -1,6 +1,5 @@
 package edu.agh.hotel.backend;
 
-import edu.agh.hotel.backend.dto.ErrorResponse;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
