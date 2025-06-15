@@ -311,7 +311,7 @@ CREATE INDEX idx_booking_log_booking_ts ON booking_log (booking_id, created_at D
 
 ## 3. Triggery
 
-Kompletne definicje SQL znajdują się w pliku: ['raport/sql/triggers.sql'](./sql/triggers.sql).
+Kompletne definicje SQL znajdują się w pliku: [`raport/sql/triggers.sql`](./sql/triggers.sql).
 
 Do obsługi takich rzeczy jak:
 * Tworzenie logów (wraz z tworzeniem JSON do `booking_log`),
