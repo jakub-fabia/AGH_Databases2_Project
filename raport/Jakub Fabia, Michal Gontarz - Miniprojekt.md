@@ -12,7 +12,7 @@
 
 ![Diagram ER](./img/Schema.png)
 
-Kompletne definicje SQL znajdują się w pliku [`sql/tables.sql`](./sql/tables.sql).
+Kompletne definicje SQL znajdują się w pliku [`raport/sql/tables.sql`](./sql/tables.sql).
 
 ---
 
@@ -233,7 +233,7 @@ CREATE TABLE booking_log (
 
 ## 2. Reguły integralności & indeksy
 
-Reguły integralności oraz indeksy poprawiające wydajność opisano w pliku [`sql/constraints_indexes.sql`](./sql/constraints_indexes.sql).
+Reguły integralności oraz indeksy poprawiające wydajność opisano w pliku [`raport/sql/constraints_indexes.sql`](./sql/constraints_indexes.sql).
 
 
 Poza wypisanymi w tabelce ograniczeniami dodano:
@@ -310,6 +310,8 @@ CREATE INDEX idx_booking_log_booking_ts ON booking_log (booking_id, created_at D
 <div style="page-break-after: always;"></div>
 
 ## 3. Triggery
+
+Kompletne definicje SQL znajdują się w pliku: ['raport/sql/triggers.sql'](./sql/triggers.sql).
 
 Do obsługi takich rzeczy jak:
 * Tworzenie logów (wraz z tworzeniem JSON do `booking_log`),
@@ -397,9 +399,7 @@ Bibliotekami które użyliśmy do utworzenia projektu są:
 - MapStruct
 - Lombok
 
-Wszystie dostępne operacje CRUD zostały zapisane w programie `Postman`.
-
-# Tutaj odnośnik do konfiguracji postmana.
+Wszystie dostępne operacje CRUD zostały zapisane w programie `Postman` w katalogu [`raport/postman`](./postman/).
 
 ## 5. Operacje na bazie danych
 
