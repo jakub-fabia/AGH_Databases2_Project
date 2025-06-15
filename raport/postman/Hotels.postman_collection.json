@@ -1,0 +1,258 @@
+{
+	"info": {
+		"_postman_id": "be3f5ba9-3414-405d-a5ce-9ef121490507",
+		"name": "Hotels",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "45743311",
+		"_collection_link": "https://a-634902.postman.co/workspace/a's-Workspace~d3161342-3f62-41a5-824b-a5b3452586c3/collection/45743311-be3f5ba9-3414-405d-a5ce-9ef121490507?action=share&source=collection_link&creator=45743311"
+	},
+	"item": [
+		{
+			"name": "Filter",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/hotels?country=Polska",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"hotels"
+					],
+					"query": [
+						{
+							"key": "country",
+							"value": "Polska"
+						},
+						{
+							"key": "city",
+							"value": null,
+							"disabled": true
+						},
+						{
+							"key": "name",
+							"value": null,
+							"disabled": true
+						},
+						{
+							"key": "stars",
+							"value": null,
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Available",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/hotels/{{id}}?checkin={}&checkout={}&roomTypeId={}&minCapacity={}&minPrice={}&maxPrice={}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"hotels",
+						"{{id}}"
+					],
+					"query": [
+						{
+							"key": "checkin",
+							"value": "{}"
+						},
+						{
+							"key": "checkout",
+							"value": "{}"
+						},
+						{
+							"key": "roomTypeId",
+							"value": "{}"
+						},
+						{
+							"key": "minCapacity",
+							"value": "{}"
+						},
+						{
+							"key": "minPrice",
+							"value": "{}"
+						},
+						{
+							"key": "maxPrice",
+							"value": "{}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Occupancy",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/hotels/{{id}}/occupancy?date=2025-06-17",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"hotels",
+						"{{id}}",
+						"occupancy"
+					],
+					"query": [
+						{
+							"key": "date",
+							"value": "2025-06-17"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetOne",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/hotels/{{id}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"hotels",
+						"{{id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetAll",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/hotels/all",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"hotels",
+						"all"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Hoteal1\",\r\n  \"country\": \"Polska\",\r\n  \"city\": \"Warszawa\",\r\n  \"address\": \"Kawiory 12\",\r\n  \"phone\": \"12411323\",\r\n  \"checkinTime\": \"13:00\",\r\n  \"checkoutTime\": \"10:00\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/hotels",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"hotels"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Hoteal1\",\r\n  \"country\": \"Polska\",\r\n  \"city\": \"Warszawa\",\r\n  \"address\": \"Kawiory 12\",\r\n  \"phone\": \"12411323\",\r\n  \"checkinTime\": \"13:00\",\r\n  \"checkoutTime\": \"10:00\",\r\n  \"stars\": 3\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/hotels/{{id}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"hotels",
+						"{{id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/hotels/{{id}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"hotels",
+						"{{id}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

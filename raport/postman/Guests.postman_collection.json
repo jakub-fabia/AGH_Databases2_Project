@@ -1,0 +1,174 @@
+{
+	"info": {
+		"_postman_id": "8862b636-7e7e-4eaa-8a04-0acbee4efd85",
+		"name": "Guests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "45743311",
+		"_collection_link": "https://a-634902.postman.co/workspace/a's-Workspace~d3161342-3f62-41a5-824b-a5b3452586c3/collection/45743311-8862b636-7e7e-4eaa-8a04-0acbee4efd85?action=share&source=collection_link&creator=45743311"
+	},
+	"item": [
+		{
+			"name": "Filter",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/guests?firstName=Jakub&lastName=Fabia",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"guests"
+					],
+					"query": [
+						{
+							"key": "firstName",
+							"value": "Jakub"
+						},
+						{
+							"key": "lastName",
+							"value": "Fabia"
+						},
+						{
+							"key": "email",
+							"value": "helias@asibd.asd",
+							"disabled": true
+						},
+						{
+							"key": "phone",
+							"value": "23872",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetOne",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/guests/{{id}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"guests",
+						"{{id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Bookings",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/guests/bookings/{{id}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"guests",
+						"bookings",
+						"{{id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/guests/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"guests",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"firstName\": \"Jakuba\",\r\n  \"lastName\": \"Fabia\",\r\n  \"dateOfBirth\": \"2020-12-06\",\r\n  \"country\": \"Polska\",\r\n  \"city\": \"Krakow\",\r\n  \"address\": \"aihbadas\",\r\n  \"phone\": \"23872\",\r\n  \"email\": \"helias@asibd.asd\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/guests/3",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"guests",
+						"3"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"firstName\": \"Jakub\",\r\n  \"lastName\": \"Fabia\",\r\n  \"dateOfBirth\": \"2022-12-06\",\r\n  \"country\": \"Polska\",\r\n  \"city\": \"Krakow\",\r\n  \"address\": \"aihbdas\",\r\n  \"phone\": \"23872132\",\r\n  \"email\": \"haelixzas@asibd.asd\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/guests",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"guests"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

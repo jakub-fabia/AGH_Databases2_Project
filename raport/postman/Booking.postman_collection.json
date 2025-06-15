@@ -1,0 +1,197 @@
+{
+	"info": {
+		"_postman_id": "56e71eb6-5f2c-4b88-bd83-a319842331e8",
+		"name": "Rooms",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "45743311",
+		"_collection_link": "https://a-634902.postman.co/workspace/a's-Workspace~d3161342-3f62-41a5-824b-a5b3452586c3/collection/45743311-56e71eb6-5f2c-4b88-bd83-a319842331e8?action=share&source=collection_link&creator=45743311"
+	},
+	"item": [
+		{
+			"name": "Filter",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/rooms?checkin=2025-06-24&checkout=2025-06-25&hotelCity=Krakow",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"rooms"
+					],
+					"query": [
+						{
+							"key": "checkin",
+							"value": "2025-06-24"
+						},
+						{
+							"key": "checkout",
+							"value": "2025-06-25"
+						},
+						{
+							"key": "roomTypeId",
+							"value": null,
+							"disabled": true
+						},
+						{
+							"key": "minCapacity",
+							"value": null,
+							"disabled": true
+						},
+						{
+							"key": "maxCapacity",
+							"value": null,
+							"disabled": true
+						},
+						{
+							"key": "minPrice",
+							"value": null,
+							"disabled": true
+						},
+						{
+							"key": "maxPrice",
+							"value": null,
+							"disabled": true
+						},
+						{
+							"key": "hotelCountry",
+							"value": null,
+							"disabled": true
+						},
+						{
+							"key": "hotelCity",
+							"value": "Krakow"
+						},
+						{
+							"key": "hotelName",
+							"value": null,
+							"disabled": true
+						},
+						{
+							"key": "hotelStars",
+							"value": null,
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Available",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/rooms/{{id}}/available?checkin=2025-06-15&checkout=2025-06-20",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"rooms",
+						"{{id}}",
+						"available"
+					],
+					"query": [
+						{
+							"key": "checkin",
+							"value": "2025-06-15"
+						},
+						{
+							"key": "checkout",
+							"value": "2025-06-20"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetOne",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/rooms/{{id}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"rooms",
+						"{{id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"hotelId\": \"1\",\r\n    \"roomTypeId\": \"1\",\r\n    \"roomNumber\": \"102a\",\r\n    \"capacity\": \"2\",\r\n    \"pricePerNight\": \"50\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/rooms",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"rooms"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"hotelId\": \"1\",\r\n    \"roomTypeId\": \"1\",\r\n    \"roomNumber\": \"111a\",\r\n    \"capacity\": \"3\",\r\n    \"pricePerNight\": \"50\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/rooms/{{id}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"rooms",
+						"{{id}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

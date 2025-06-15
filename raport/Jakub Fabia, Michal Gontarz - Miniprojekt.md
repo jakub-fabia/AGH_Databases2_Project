@@ -1,6 +1,10 @@
 # System rezerwacji hotelowych
 
-**Autorzy:** Jakub Fabia · Michał Gontarz
+**Autorzy:** 
+
+[Jakub Fabia](https://github.com/jakub-fabia)
+
+[Michał Gontarz](https://github.com/gontarsky04)
 
 ---
 
@@ -8,7 +12,7 @@
 
 ![Diagram ER](./img/Schema.png)
 
-Kompletne definicje SQL znajdują się w pliku [`sql/tables.sql`](./sql/tables.sql).
+Kompletne definicje SQL znajdują się w pliku [`raport/sql/tables.sql`](./sql/tables.sql).
 
 ---
 
@@ -209,7 +213,7 @@ CREATE TABLE booking (
 
 CREATE TABLE booking_room (
   booking_room_id SERIAL        PRIMARY KEY,
-  booking_id      INT           NOT NULL REFERENCES booking,
+  booking_id      INT,
   room_id         INT           NOT NULL REFERENCES room,
   checkin_date    DATE          NOT NULL,
   checkout_date   DATE          NOT NULL
@@ -229,7 +233,7 @@ CREATE TABLE booking_log (
 
 ## 2. Reguły integralności & indeksy
 
-Reguły integralności oraz indeksy poprawiające wydajność opisano w pliku [`sql/constraints_indexes.sql`](./sql/constraints_indexes.sql).
+Reguły integralności oraz indeksy poprawiające wydajność opisano w pliku [`raport/sql/constraints_indexes.sql`](./sql/constraints_indexes.sql).
 
 
 Poza wypisanymi w tabelce ograniczeniami dodano:
@@ -306,6 +310,8 @@ CREATE INDEX idx_booking_log_booking_ts ON booking_log (booking_id, created_at D
 <div style="page-break-after: always;"></div>
 
 ## 3. Triggery
+
+Kompletne definicje SQL znajdują się w pliku: [`raport/sql/triggers.sql`](./sql/triggers.sql).
 
 Do obsługi takich rzeczy jak:
 * Tworzenie logów (wraz z tworzeniem JSON do `booking_log`),
@@ -390,10 +396,10 @@ Bibliotekami które użyliśmy do utworzenia projektu są:
 - Spring Boot Validation
 - Spring Boot Web
 - Spring Boot DevTools
+- MapStruct
 - Lombok
 
-Wszystie dostępne operacje CRUD zostały zapisane w programie `Postman`.
-# Tutaj odnośnik do konfiguracji postmana.
+Wszystie dostępne operacje CRUD zostały zapisane w programie `Postman` w katalogu [`raport/postman`](./postman/).
 
 ## 5. Operacje na bazie danych
 
@@ -551,7 +557,8 @@ public class GlobalExceptionHandler {
 ### `GET /api/bookings/{id}`
 
 **Metoda:** `BookingService.get(Integer id)`
-**Opis:**
+
+**Opis:** 
 Pobiera szczegóły zamówienia o podanym identyfikatorze.
 
 **Parametry:**
@@ -572,7 +579,8 @@ Obiekt `Booking` w formacie JSON / Wiadomość o błędzie
 ### `POST /api/bookings`
 
 **Metoda:** `BookingService.create(BookingCreateRequest request)`
-**Opis:**
+
+**Opis:** 
 Tworzy nowe zamówienie z danych przesłanych w ciele żądania.
 
 **Parametry:**
@@ -616,7 +624,8 @@ Nowo utworzony `Booking` jako JSON / Wiadomość o błędzie
 ### `PUT /api/bookings/{id}`
 
 **Metoda:** `BookingService.update(Integer id, BookingUpdateRequest request)`
-**Opis:**
+
+**Opis:** 
 Aktualizuje istniejące zamówienie na podstawie przekazanych danych.
 
 **Parametry:**
@@ -658,7 +667,8 @@ Zaktualizowany obiekt `Booking` / Wiadomość o błędzie
 ### `PATCH /api/bookings/{id}?status={status}`
 
 **Metoda:** `BookingService.changeStatus(Integer id, BookingStatus status)`
-**Opis:**
+
+**Opis:** 
 Zmienia status istniejącego zamówienia.
 
 **Parametry:**
@@ -698,7 +708,8 @@ Zaktualizowany obiekt `Booking` / Wiadomość o błędzie
 ### `DELETE /api/bookings/{id}`
 
 **Metoda:** `BookingService.delete(Integer id)`
-**Opis:**
+
+**Opis:** 
 Usuwa zamówienie o podanym `id`.
 
 **Parametry:**
@@ -724,7 +735,8 @@ Brak treści (`void`) / Wiadomość o błędzie
 ### `GET /api/guests?firstName={...}&lastName={...}&email={...}&phone={...}`
 
 **Metoda:** `GuestService.list(String firstName, String lastName, String email, String phone, Pageable pageable)`
-**Opis:**
+
+**Opis:** 
 Zwraca paginowaną listę gości na podstawie podanych filtrów (imienia, nazwiska, e-maila i telefonu).
 
 **Parametry:**
@@ -752,7 +764,8 @@ Obiekt `Page<GuestSummary>`, czyli lista gości z paginacją
 ### `GET /api/guests/bookings/{id}`
 
 **Metoda:** `GuestService.getBookings(Integer id)`
-**Opis:**
+
+**Opis:** 
 Zwraca szczegóły gościa o podanym `id`, wraz z jego rezerwacjami i informacjami o pokojach.
 
 **Parametry:**
@@ -787,7 +800,8 @@ Obiekt `Guest` z pełną strukturą rezerwacji
 ### `GET /api/guests/{id}`
 
 **Metoda:** `GuestService.get(Integer id)`
-**Opis:**
+
+**Opis:** 
 Pobiera podstawowe informacje o gościu o podanym `id`, bez rezerwacji.
 
 **Parametry:**
@@ -812,7 +826,8 @@ Obiekt `GuestSummary`
 ### `POST /api/guests`
 
 **Metoda:** `GuestService.create(GuestCreateRequest req)`
-**Opis:**
+
+**Opis:** 
 Tworzy nowego gościa na podstawie danych przesłanych w ciele żądania.
 
 **Parametry:**
@@ -857,7 +872,8 @@ Nowo utworzony obiekt `Guest` jako JSON
 ### `PUT /api/guests/{id}`
 
 **Metoda:** `GuestService.update(Integer id, GuestUpdateRequest req)`
-**Opis:**
+
+**Opis:** 
 Aktualizuje dane istniejącego gościa o podanym `id`.
 
 **Parametry:**
@@ -900,7 +916,8 @@ Zaktualizowany obiekt `Guest`
 ### `DELETE /api/guests/{id}`
 
 **Metoda:** `GuestService.delete(Integer id)`
-**Opis:**
+
+**Opis:** 
 Usuwa gościa o podanym identyfikatorze.
 
 **Parametry:**
@@ -927,7 +944,8 @@ Obiekt `SuccessResponse` z komunikatem usunięcia
 ### `GET /api/hotels/all`
 
 **Metoda:** `HotelService.getAll(Pageable pageable)`
-**Opis:**
+
+**Opis:** 
 Zwraca wszystkie hotele w formie paginowanej, bez żadnych filtrów.
 
 **Parametry:**
@@ -948,10 +966,11 @@ Obiekt `Page<Hotel>`
 
 ---
 
-### `GET /api/hotels`
+### `GET /api/hotels?city={}&country={}&name={}&stars={}`
 
 **Metoda:** `HotelService.list(String country, String city, String name, Integer stars, Pageable pageable)`
-**Opis:**
+
+**Opis:** 
 Zwraca listę hoteli spełniających podane kryteria: kraj, miasto, nazwa, liczba gwiazdek.
 
 **Parametry:**
@@ -978,7 +997,8 @@ Obiekt `Page<Hotel>`
 ### `GET /api/hotels/{id}`
 
 **Metoda:** `HotelService.get(Long id)`
-**Opis:**
+
+**Opis:** 
 Zwraca szczegóły hotelu o podanym identyfikatorze.
 
 **Parametry:**
@@ -1003,7 +1023,8 @@ Obiekt `Hotel`
 ### `GET /api/hotels/{id}/occupancy?date={...}`
 
 **Metoda:** `HotelService.listOccupancy(Long hotelId, LocalDate date)`
-**Opis:**
+
+**Opis:** 
 Zwraca listę rezerwacji z zajętymi pokojami w danym hotelu i danym dniu.
 
 **Parametry:**
@@ -1028,18 +1049,19 @@ Lista obiektów `Booking` z zajętymi pokojami
 
 ---
 
-### `GET /api/hotels/{id}/available?checkin={...}&checkout={...}&roomTypeId={...}`
+### `GET /api/hotels/{id}/available?checkin={...}&checkout={...}&roomTypeId={...}&minCapacity={...}&minPrice={...}&maxPrice={...}`
 
-**Metoda:** `HotelService.countAvailableRooms(Long hotelId, Integer roomTypeId, LocalDate checkin, LocalDate checkout)`
-**Opis:**
-Zwraca liczbę dostępnych pokojów w danym hotelu na zadany przedział czasowy, opcjonalnie ograniczoną do typu pokoju.
+**Metoda:** `HotelService.availableRooms(LocalDate checkin, LocalDate checkout, Integer roomTypeId, Short minCapacity, BigDecimal minPrice, BigDecimal maxPrice, Long hotelId, Pageable pageable)`
+
+**Opis:** 
+Zwraca `Page `dostępnych pokoji w danym hotelu na zadany przedział czasowy z opcjonalnymi filtrami.
 
 **Parametry:**
 
 * `id` – identyfikator hotelu
 * `checkin` – data zameldowania
 * `checkout` – data wymeldowania
-* `roomTypeId` – identyfikator typu pokoju (opcjonalny)
+* `roomTypeId`, `minCapacity`, `minPrice`, `maxPrice` – filtry (opcjonalny)
 
 **Walidacja:**
 
@@ -1051,17 +1073,18 @@ Zwraca liczbę dostępnych pokojów w danym hotelu na zadany przedział czasowy,
 
 1. Przekazanie parametrów do zapytania w `RoomRepository`
 2. Wyliczenie liczby dostępnych pokojów
-3. Zwrócenie wartości
+3. Zwrócenie paginowanej listy
 
 **Zwraca:**
-Liczba (`long`) dostępnych pokojów
+Obiekt `Page<Room>`
 
 ---
 
 ### `POST /api/hotels`
 
 **Metoda:** `HotelService.create(HotelCreateRequest req)`
-**Opis:**
+
+**Opis:** 
 Tworzy nowy hotel na podstawie danych z ciała żądania.
 
 **Parametry:**
@@ -1102,7 +1125,8 @@ Nowy obiekt `Hotel`
 ### `PUT /api/hotels/{id}`
 
 **Metoda:** `HotelService.update(Long id, HotelUpdateRequest req)`
-**Opis:**
+
+**Opis:** 
 Aktualizuje dane hotelu o wskazanym identyfikatorze.
 
 **Parametry:**
@@ -1144,7 +1168,8 @@ Zaktualizowany obiekt `Hotel`
 ### `DELETE /api/hotels/{id}`
 
 **Metoda:** `HotelService.delete(Long id)`
-**Opis:**
+
+**Opis:** 
 Usuwa hotel o podanym `id`.
 
 **Parametry:**
@@ -1168,9 +1193,345 @@ Obiekt `SuccessResponse` z komunikatem
 
 ---
 
+### `GET /api/rooms`
 
+**Metoda:**
+`RoomService.list(LocalDate checkin, LocalDate checkout, Integer roomTypeId, Short minCapacity, BigDecimal minPrice, BigDecimal maxPrice, String hotelCountry, String hotelCity, String hotelName, Integer hotelStars, Pageable pageable)`
+
+
+**Opis:** 
+Zwraca paginowaną listę dostępnych pokoi w zadanym przedziale dat, z opcjonalnym filtrowaniem (typ pokoju, pojemność, cena, lokalizacja, gwiazdki hotelu).
+
+**Parametry:**
+
+* `checkin` – data przyjazdu (wymagana)
+* `checkout` – data wyjazdu (wymagana)
+* `roomTypeId`, `minCapacity`, `minPrice`, `maxPrice`, `hotelCountry`, `hotelCity`, `hotelName`, `hotelStars` – parametry opcjonalne
+* `page`, `size`, `sort` – paginacja
+
+**Walidacja:**
+
+* `@FutureOrPresent` na obu datach
+* Walidacja, że `checkin < checkout`
+* Walidacja typów i paginacji przez Spring
+
+**Przebieg:**
+
+1. Walidacja zakresu dat
+2. Zbudowanie dynamicznej specyfikacji filtrującej (`RoomSpecification`)
+3. Wykonanie zapytania do bazy
+4. Zwrócenie paginowanej listy pokoi
+
+**Zwraca:**
+Obiekt `Page<Room>`
+
+---
+
+### `GET /api/rooms/{id}/available?checkin={...}&checkout={...}`
+
+**Metoda:**
+`RoomService.isAvailable(Long roomId, LocalDate checkin, LocalDate checkout)`
+
+
+**Opis:** 
+Sprawdza, czy dany pokój jest dostępny w określonym przedziale dat.
+
+**Parametry:**
+
+* `id` – identyfikator pokoju (ścieżka)
+* `checkin`, `checkout` – daty przyjazdu i wyjazdu (wymagane)
+
+**Walidacja:**
+
+* `@FutureOrPresent` dla dat
+* Sprawdzenie, że `checkin < checkout`
+* Walidacja istnienia pokoju
+
+**Przebieg:**
+
+1. Walidacja danych wejściowych
+2. Sprawdzenie istnienia pokoju
+3. Zapytanie o konflikty w rezerwacjach (`bookingRoomRepo.existsBy...`)
+4. Zwrócenie dostępności (prawda/fałsz)
+
+**Zwraca:**
+`true` lub `false` (czy pokój jest dostępny)
+
+---
+
+### `GET /api/rooms/{id}`
+
+**Metoda:**
+`RoomService.get(Long id)`
+
+
+**Opis:** 
+Zwraca szczegóły pokoju o podanym identyfikatorze.
+
+**Parametry:**
+
+* `id` – identyfikator pokoju (ścieżka)
+
+**Walidacja:**
+
+* Sprawdzenie istnienia pokoju w bazie
+* Rzucenie `EntityNotFoundException` w przypadku braku
+
+**Przebieg:**
+
+1. Pobranie pokoju z repozytorium
+2. Zwrócenie obiektu
+
+**Zwraca:**
+Obiekt `Room`
+
+---
+
+### `POST /api/rooms`
+
+**Metoda:**
+`RoomService.create(RoomCreateRequest req)`
+
+
+**Opis:** 
+Tworzy nowy pokój na podstawie przesłanych danych.
+
+**Parametry:**
+
+* `body` – JSON `RoomCreateRequest` z danymi pokoju
+
+**Walidacja:**
+
+* Adnotacje walidacyjne w `RoomCreateRequest` (np. `@Min`, `@NotNull`)
+* Sprawdzenie istnienia hotelu (`hotelId`)
+* Sprawdzenie istnienia typu pokoju (`roomTypeId`)
+
+**Przebieg:**
+
+1. Walidacja danych wejściowych
+2. Mapowanie DTO na encję
+3. Pobranie powiązanego hotelu i typu pokoju
+4. Przypisanie ich do encji `Room`
+5. Zapis pokoju do bazy
+6. Zwrócenie utworzonego pokoju
+
+**Zwraca:**
+Nowy obiekt `Room`
+
+**Przykład JSON (request):**
+
+```json
+{
+    "hotelId": "1",
+    "roomTypeId": "1",
+    "roomNumber": "102a",
+    "capacity": "2",
+    "pricePerNight": "50"
+}
+```
+
+---
+
+### `PUT /api/rooms/{id}`
+
+**Metoda:**
+`RoomService.update(Long id, RoomUpdateRequest req)`
+
+
+**Opis:** 
+Aktualizuje dane pokoju o podanym identyfikatorze.
+
+**Parametry:**
+
+* `id` – identyfikator pokoju
+* `body` – JSON `RoomUpdateRequest` z danymi do aktualizacji
+
+**Walidacja:**
+
+* Walidacja danych wejściowych (adnotacje w DTO)
+* Sprawdzenie istnienia pokoju
+* W razie potrzeby: sprawdzenie istnienia hotelu i typu pokoju (jeśli pola zostały podane)
+
+**Przebieg:**
+
+1. Pobranie pokoju z repozytorium
+2. Aktualizacja pól przez mappera
+3. Jeżeli podano nowe `hotelId`, przypisanie hotelu
+4. Jeżeli podano nowe `roomTypeId`, przypisanie typu
+5. Zapis zmian
+6. Zwrócenie zaktualizowanego pokoju
+
+**Zwraca:**
+Zaktualizowany obiekt `Room`
+
+**Przykład JSON (request):**
+
+```json
+{
+    "hotelId": "1",
+    "roomTypeId": "1",
+    "roomNumber": "102a",
+    "capacity": "2",
+    "pricePerNight": "50"
+}
+```
+
+---
+
+### `GET /api/logs/bookings?bookingId={...}&from={...}&to={...}&status={...}`
+
+**Metoda:**
+`BookingLogRepository.findAll(Specification<BookingLog>, Pageable pageable)`
+
+
+**Opis:** 
+Zwraca paginowaną listę logów zmian w rezerwacjach. Można zawęzić wyniki, podając `bookingId`, zakres czasowy (`from`, `to`) oraz `BookingStatus`.
+
+**Parametry:**
+
+* `bookingId` – identyfikator rezerwacji (opcjonalny)
+* `from` – dolna granica daty logu (`Instant`) (opcjonalna)
+* `to` – górna granica daty logu (`Instant`) (opcjonalna)
+* `status` – status rezerwacji po zmianie (opcjonalny)
+* `page`, `size`, `sort` – paginacja
+
+**Walidacja:**
+
+* Spring automatycznie waliduje poprawność formatu dat (`@DateTimeFormat`)
+* Brak obowiązkowych parametrów – wszystkie opcjonalne
+
+**Przebieg:**
+
+1. Zbudowanie dynamicznej specyfikacji (`BookingLogSpecification.filterBy(...)`)
+2. Wykonanie zapytania z repozytorium
+3. Zwrócenie paginowanej listy logów
+
+**Zwraca:**
+Obiekt `Page<BookingLog>`
+
+---
+
+### `GET /api/logs/rooms?roomId={...}&from={...}&to={...}`
+
+**Metoda:**
+`RoomLogRepository.findAll(Specification<RoomLog>, Pageable pageable)`
+
+
+**Opis:** 
+Zwraca paginowaną listę logów zmian związanych z pokojami (np. zmiana ceny, pojemności). Można filtrować po identyfikatorze pokoju oraz zakresie czasowym.
+
+**Parametry:**
+
+* `roomId` – identyfikator pokoju (opcjonalny)
+* `from` – dolna granica czasowa (`Instant`) (opcjonalna)
+* `to` – górna granica czasowa (`Instant`) (opcjonalna)
+* `page`, `size`, `sort` – parametry paginacji
+
+**Walidacja:**
+
+* Automatyczna walidacja formatu `Instant` przez Spring
+* Wszystkie parametry są opcjonalne
+
+**Przebieg:**
+
+1. Utworzenie dynamicznego zapytania (`RoomLogSpecification.filterBy(...)`)
+2. Pobranie logów z bazy
+3. Zwrócenie wyników w formie strony
+
+**Zwraca:**
+Obiekt `Page<RoomLog>`
+
+---
 
 ## 6. Możliwości technologii wykorzystanych w projekcie
 
-- Zapisywanie plików JSON w tabeli SQL
-- Użycie indeksu GiST do warunku integralnościowego nakładających się rezerwacji na ten sam pokój
+### 6.1 JSONB w tabeli `booking_log`
+
+W logach rezerwacji zapisujemy pełną listę pokojów w pojedynczej kolumnie `booking_rooms JSONB` – w momencie modyfikacji system wykonuje migawkę `{room_id, checkin, checkout}` dla wszystkich pozycji rezerwacji. Dzięki temu historyczne dane są „samowystarczalne”: raport lub eksport może być odtworzony bez łączenia z bieżącymi tabelami.
+
+Jedno-kolumnowy snapshot skraca czas zapytań analitycznych i chroni przed „zgubieniem” starych wartości po zmianach w głównych tabelach.
+
+---
+
+### 6.2 GiST + EXCLUDE — gwarancja braku nakładających się rezerwacji
+
+#### Definicja reguły
+
+```sql
+ALTER TABLE booking_room
+  ADD CONSTRAINT no_room_overlap
+  EXCLUDE USING gist (
+    room_id WITH =,
+    daterange(checkin_date, checkout_date) WITH &&
+  );
+```
+
+Ta pojedyncza klauzula zapewnia, że dla danego `room_id` dwa przedziały dat nie mogą się przeciąć.
+
+* Spójność wymuszana już na poziomie bazy – warstwa usług nie musi wykonywać locków ani odpytywać stanu przed insertem.
+* Indeks GiST działa szybko również przy milionach wierszy, bo porównuje tylko potrzebne fragmenty przedziałów.
+
+---
+
+### 6.3 Lombok — mniej boilerplate, czytelniejszy kod
+
+Projekt korzysta z adnotacji `@Getter`, `@Setter`, `@Builder`, `@Data` i kilku innych, zdefiniowanych w zależnościach `Lombok`. Efekt to:
+
+* dziesiątki klas encji i DTO bez ręcznego pisania getterów/setterów,
+* obiekty testowe budowane eleganckim „builderem”.
+
+---
+
+### 6.4 Spring Data JPA — deklaratywne zapytania i **kontrola równoczesnego dostępu do danych**
+
+* **Mechanizm transakcji (`@Transactional`) jest kluczową warstwą kontroli współbieżności**: każda metoda oznaczona tą adnotacją wykonuje się w ramach jednej transakcji Postgresa, a jeśli w jej trakcie wystąpi konflikt (np. złamanie constraintu GiST + EXCLUDE opis. w pkt 6.2), cała operacja zostaje automatycznie wycofana (rollback).
+* Repozytoria dziedziczą po `JpaRepository`, a bardziej złożone filtry powstają dzięki `JpaSpecificationExecutor`; kod domenowy zawiera bardzo mało ręcznie pisanych `SELECT … FOR UPDATE`, bo to właśnie transakcja + constraint w bazie gwarantują spójność przy wielu równoległych żądaniach.
+* Atrybut `readOnly = true` w `@Transactional` wymusza, że dane metody wykonują wyłącznie odczyty — eliminuje ryzyko przypadkowych zapisów i zmniejsza koszty blokad.
+
+
+---
+
+### 6.5 Spring DevTools — hot-reload w sekundę
+
+Zależność `spring-boot-devtools` obserwuje zmianę plików `.class` i restartuje kontener niemal natychmiast.
+
+---
+
+### 6.6 Postman — powtarzalne testy API
+
+Wszystkie operacje zapisane są w kolekcjach Postmana. Kolekcje pozwalają przetestować działanie endpointów w kontrolowanych warunkach.
+
+---
+
+### 6.7 Jakarta Bean Validation — walidacja deklaratywna
+
+Adnotacje takie jak `@NotBlank`, `@Email`, `@Past` są umieszczone bezpośrednio w klasach requestów; Spring wywołuje walidator automatycznie przy `@Valid`. Błędy trafiają do globalnego handlera i wracają w jednolitym formacie JSON, więc front-end dostaje zawsze tę samą strukturę komunikatu.
+
+---
+
+### 6.8 MapStruct — typu-bezpieczne mapowanie DTO ↔ encje
+
+W opisie każdego endpointu CREATE lub PUT pojawia się krok „Konwersja DTO na encję (mapper)”. Za generację tych mapperów odpowiada MapStruct, co daje:
+
+* zero ręcznego „kopiuj pól”,
+* compile-time sprawdzenie zgodności typów.
+
+---
+
+## 7. Dodatkowe technologie wykorzystane w projekcie
+
+### 7.1 Konteneryzacja przy pomocy Dockera
+
+Całe środowisko uruchomieniowe zostało rozłożone na trzy odrębne obrazy:
+
+* **backend (Spring Boot)** – osobny kontener, w którym budujemy artefakt projekt i uruchamiamy go w obrazie `JDK 24`.
+* **frontend (React JS)** – drugi kontener bazujący na `Node LTS`; w fazie budowania powstaje statyczny bundle, a w fazie uruchomienia serwuje go serwer `Nginx`.
+* **baza danych (PostgreSQL)** – trzeci kontener oparty na obrazie `postgres:latest`, z dołączonym wolumenem na dane.
+
+---
+
+### 7.2 Frontend zbudowany w React JS
+
+Warstwa prezentacji powstała w oparciu o **React** z wykorzystaniem:
+
+# Tutaj biblioteki na frontendzie

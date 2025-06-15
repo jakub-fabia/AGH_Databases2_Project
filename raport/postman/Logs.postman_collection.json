@@ -1,0 +1,90 @@
+{
+	"info": {
+		"_postman_id": "04eb6513-6d40-463a-a0db-f0e83cb9a51e",
+		"name": "Logs",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "45743311",
+		"_collection_link": "https://a-634902.postman.co/workspace/a's-Workspace~d3161342-3f62-41a5-824b-a5b3452586c3/collection/45743311-04eb6513-6d40-463a-a0db-f0e83cb9a51e?action=share&source=collection_link&creator=45743311"
+	},
+	"item": [
+		{
+			"name": "Booking",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/logs/bookings?status=CONFIRMED",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"logs",
+						"bookings"
+					],
+					"query": [
+						{
+							"key": "status",
+							"value": "CONFIRMED"
+						},
+						{
+							"key": "bookingId",
+							"value": null,
+							"disabled": true
+						},
+						{
+							"key": "from",
+							"value": null,
+							"disabled": true
+						},
+						{
+							"key": "to",
+							"value": null,
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Room",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/logs/rooms?roomId=1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"logs",
+						"rooms"
+					],
+					"query": [
+						{
+							"key": "from",
+							"value": "",
+							"disabled": true
+						},
+						{
+							"key": "to",
+							"value": "",
+							"disabled": true
+						},
+						{
+							"key": "roomId",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
