@@ -392,8 +392,214 @@ Bibliotekami które użyliśmy do utworzenia projektu są:
 - Spring Boot DevTools
 - Lombok
 
-### 4.1. Operacje na bazie danych
+Wszystie dostępne operacje CRUD zostały zapisane w programie `Postman`.
+# Tutaj odnośnik do konfiguracji postmana.
 
+## 5. Operacje na bazie danych
+
+### 5.1. Booking
+
+#### GetOne - operacja zebrania szczegółów zamówienia o podanym id
+
+```
+GET: http://localhost:8080/api/bookings/{{id}}
+```
+Zrealizowana przy pomocy standardowej metody `findById(id)` z `JpaRepository` (Spring Data JPA).
+Wykonuje polecenie:
+```sql
+select
+    b1_0.booking_id,
+    b1_0.created_at,
+    b1_0.guest_id,
+    b1_0.hotel_id,
+    b1_0.status,
+    b1_0.total_price 
+from
+    booking b1_0 
+where
+    b1_0.booking_id=?
+select
+    h1_0.hotel_id,
+    h1_0.address,
+    h1_0.checkin_time,
+    h1_0.checkout_time,
+    h1_0.city,
+    h1_0.country,
+    h1_0.name,
+    h1_0.phone,
+    h1_0.stars 
+from
+    hotel h1_0 
+where
+    h1_0.hotel_id=?
+select
+    br1_0.booking_id,
+    br1_0.booking_room_id,
+    br1_0.checkin_date,
+    br1_0.checkout_date,
+    br1_0.room_id 
+from
+    booking_room br1_0 
+where
+    br1_0.booking_id=?
+select
+    r1_0.room_id,
+    r1_0.capacity,
+    r1_0.hotel_id,
+    r1_0.price_per_night,
+    r1_0.room_number,
+    r1_0.room_type_id 
+from
+    room r1_0 
+where
+    r1_0.room_id=?
+select
+    rt1_0.room_type_id,
+    rt1_0.name 
+from
+    room_type rt1_0 
+where
+    rt1_0.room_type_id=?
+select
+    r1_0.room_id,
+    r1_0.capacity,
+    r1_0.hotel_id,
+    r1_0.price_per_night,
+    r1_0.room_number,
+    r1_0.room_type_id 
+from
+    room r1_0 
+where
+    r1_0.room_id=?
+```
+
+#### Create - Utworzenie nowego zamówienia z jednym lub wieloma pokojami
+
+```
+CREATE: http://localhost:8080/api/bookings
+```
+```json
+{
+    "guestId": "3",
+    "hotelId": "1",
+    "status": "PENDING",
+    "bookingRooms": [
+        {
+            "roomId": "1",
+            "checkinDate": "2025-07-19",
+            "checkoutDate": "2025-07-21"
+        },
+        {
+          "..."
+        }
+    ]
+}
+```
+
+```java
+@Transactional
+@Override
+public Booking create(BookingCreateRequest req) {
+    Booking booking = bookingMapper.toEntity(req);
+
+    Guest guest = guestRepo.findById(req.guestId())
+            .orElseThrow(() -> new EntityNotFoundException("Guest " + req.guestId() + " not found"));
+    booking.setGuest(guest);
+
+    Hotel hotel = hotelRepo.findById(Long.valueOf(req.hotelId()))
+            .orElseThrow(() -> new EntityNotFoundException("Hotel " + req.hotelId() + " not found"));
+    booking.setHotel(hotel);
+
+    BigDecimal total = BigDecimal.ZERO;
+
+    for (var brReq : req.bookingRooms()) {
+        Room room = roomRepo.findById(brReq.roomId())
+                .orElseThrow(() -> new EntityNotFoundException("Room " + brReq.roomId() + " not found"));
+
+        boolean overlap = bookingRoomRepo.existsByRoom_IdAndCheckinDateLessThanAndCheckoutDateGreaterThan(
+                room.getId(),
+                brReq.checkoutDate(),
+                brReq.checkinDate()
+        );
+        if (overlap) {
+            throw new IllegalStateException(
+                    "Room " + room.getId() + " is not available from "
+                            + brReq.checkinDate() + " to " + brReq.checkoutDate()
+            );
+        }
+
+        long nights = ChronoUnit.DAYS.between(brReq.checkinDate(), brReq.checkoutDate());
+        BigDecimal line = room.getPricePerNight().multiply(BigDecimal.valueOf(nights));
+        total = total.add(line);
+
+        BookingRoom br = new BookingRoom(booking, room, brReq.checkinDate(), brReq.checkoutDate());
+        booking.addBookingRoom(br);
+    }
+    booking.setCreatedAt(Instant.now());
+    booking.setTotalPrice(total);
+    Booking saved = bookingRepo.save(booking);
+    log.info("Created Booking {} for Guest {}", saved.getId(), guest.getId());
+    return saved;
+}
+```
+
+Gdzie metoda `bookingRoomRepo.existsByRoom_IdAndCheckinDateLessThanAndCheckoutDateGreaterThan` jest też standardowa z `JpaRepository`.
+
+Wykonuje polecenie:
+```sql
+Hibernate: 
+insert 
+into
+    booking
+    (created_at, guest_id, hotel_id, status, total_price) 
+values
+    (?, ?, ?, ?, ?)
+Hibernate: 
+insert 
+into
+    booking_room
+    (booking_id, checkin_date, checkout_date, room_id) 
+values
+    (?, ?, ?, ?)
+Hibernate: 
+select
+    rt1_0.room_type_id,
+    rt1_0.name 
+from
+    room_type rt1_0 
+where
+    rt1_0.room_type_id=?
+```
+
+#### Update - Uaktualnienie istniejącej rezerwacji
+
+```
+PUT: http://localhost:8080/api/bookings/{{id}}
+```
+```json
+{
+{
+    "status": "PENDING",
+    "bookingRooms": [
+        {
+            "roomId": "1",
+            "checkinDate": "2025-07-17",
+            "checkoutDate": "2025-07-20"
+        },
+        {
+          "..."
+        }
+    ]
+}
+```
+
+### 5.2. Guests
+
+### 5.3. Hotels
+
+### 5.4. Logs
+
+### 5.5. Rooms
 
 ## 6. Możliwości technologii wykorzystanych w projekcie
 
