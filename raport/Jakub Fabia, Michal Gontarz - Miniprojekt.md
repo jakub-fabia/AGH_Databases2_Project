@@ -30,8 +30,8 @@ Kompletne definicje SQL znajdują się w pliku [`sql/tables.sql`](./sql/tables
 | phone         | VARCHAR **NOT NULL** | UNIQUE                       | Telefon recepcji                           |
 | checkin_time  | TIME **NOT NULL**    | checkin_time > checkout_time | Standardowa godzina zameldowania           |
 | checkout_time | TIME **NOT NULL**    |                              | Standardowa godzina wymeldowania           |
-
 ---
+> Każda czwórka (name, country, city, adress) musi być unikalna.
 
 <div style="page-break-after: always;"></div>
 
@@ -42,7 +42,7 @@ Kompletne definicje SQL znajdują się w pliku [`sql/tables.sql`](./sql/tables
 | Kolumna     | Typ                   | Klucz / ograniczenia | Znaczenie                                       |
 | ----------- | --------------------- | -------------------- | ----------------------------------------------- |
 | type_id     | SERIAL                | **PK**               | Identyfikator typu                              |
-| name        | VARCHAR **NOT NULL**  |                      | Nazwa kategorii ("Apartament", "Łóżko"...)      |
+| name        | VARCHAR **NOT NULL**  |     UNIQUE                 | Nazwa kategorii ("Apartament", "Łóżko"...)      |
 ---
 
 <div style="page-break-after: always;"></div>
@@ -94,6 +94,7 @@ Kompletne definicje SQL znajdują się w pliku [`sql/tables.sql`](./sql/tables
 | email                  | VARCHAR              | UNIQUE                  | E‑mail                     |
 
 ---
+> Jedna z wartości w dwójce (email, phone) musi być NOT NULL.
 
 <div style="page-break-after: always;"></div>
 
@@ -120,8 +121,8 @@ Kompletne definicje SQL znajdują się w pliku [`sql/tables.sql`](./sql/tables
 
 | Kolumna       | Typ                  | Klucz / ograniczenia  | Znaczenie                             |
 | ------------- | -------------------- | --------------------- | ------------------------------------- |
-| booking_room_id    | INT                  | **PK** fk → `booking` |                                       |
-| booking_id       | INT                  | FK część skł. PK -> `booking'     |                      Identyfikator zamówienia |
+| booking_room_id    | SERIAL                  | **PK** fk → `booking` |                                       |
+| booking_id       | INT **NOT NULL**             | FK część skł. PK -> `booking'     |                      Identyfikator zamówienia |
 | room_id | INT **NOT NULL**    | FK część skł. PK -> `room`    | Rezerwowany pokój          |
 | checkin_date  | DATE **NOT NULL**    | checkout > checkin    | Data zameldowania                     |
 | checkout_date | DATE **NOT NULL**    | checkout > checkin    | Data wymeldowania                     |
@@ -136,11 +137,11 @@ Kompletne definicje SQL znajdują się w pliku [`sql/tables.sql`](./sql/tables
 | Kolumna                      | Typ            | Klucz / ograniczenia  | Znaczenie                                                                |
 | ---------------------------- | -------------- | --------------------- | ------------------------------------------------------------------------ |
 | booking_log_id               | SERIAL         | **PK**                |                                                                          |
-| booking_id                   | INT            | FK → `booking`        |                                                                          |
-| created_at                   | TIMESTAMPTZ    | DEFAULT now()         |                                                                          |
+| booking_id                   | INT **NOT NULL**           | FK → `booking`        |                                                                          |
+| created_at                   | TIMESTAMPTZ **NOT NULL**   | DEFAULT now()         |                                                                          |
 | total_price                  | NUMERIC **NOT NULL** | total_price > 0            | Kwota za całe zamówienie       |
-| status                       | VARCHAR        |                       | Nowy status zamówienia                                                   |
-| booking_rooms                | JSONB          |                       | Nowe szczegóły zamówienia w formie `{room_id, checkin, checkout}` |
+| status                       | VARCHAR **NOT NULL**        |                       | Nowy status zamówienia                                                   |
+| booking_rooms                | JSONB **NOT NULL**         |                       | Nowe szczegóły zamówienia w formie `{room_id, checkin, checkout}` |
 
 ---
 
@@ -302,6 +303,7 @@ CREATE INDEX idx_booking_log_booking_ts ON booking_log (booking_id, created_at D
 
 Do obsługi takich rzeczy jak:
 * Tworzenie logów (wraz z tworzeniem JSON do `booking_log`),
+* Kontrola rezerwacji pokoi (w jednej rezerwacji mogą znajdować się tylko pokoi z tego samego hotelu),
 
 wykorzystano triggery.
 
@@ -342,6 +344,35 @@ END $$;
 CREATE TRIGGER booking_aiu_log
 AFTER INSERT OR UPDATE ON booking
 FOR EACH ROW EXECUTE FUNCTION f_insert_booking_log();
+
+CREATE OR REPLACE FUNCTION check_booking_rooms_same_hotel()
+RETURNS TRIGGER AS $$
+DECLARE
+    existing_hotel_id INT;
+    new_room_hotel_id INT;
+BEGIN
+    SELECT r.hotel_id INTO new_room_hotel_id
+    FROM room r
+    WHERE r.room_id = NEW.room_id;
+
+    SELECT r.hotel_id INTO existing_hotel_id
+    FROM booking_room br
+    JOIN room r ON r.room_id = br.room_id
+    WHERE br.booking_id = NEW.booking_id
+    LIMIT 1;
+
+    IF existing_hotel_id IS NOT NULL AND existing_hotel_id <> new_room_hotel_id THEN
+        RAISE EXCEPTION 'All rooms in a single booking must belong to the same hotel.';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_check_booking_room_hotel
+BEFORE INSERT ON booking_room
+FOR EACH ROW
+EXECUTE FUNCTION check_booking_rooms_same_hotel();
 ```
 ---
 
