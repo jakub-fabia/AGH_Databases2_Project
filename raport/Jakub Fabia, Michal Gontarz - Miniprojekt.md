@@ -257,6 +257,12 @@ ALTER TABLE guest
   ADD CHECK (date_of_birth < CURRENT_DATE),
   ADD CHECK (email IS NOT NULL OR phone IS NOT NULL);
 
+ALTER TABLE booking_log
+ADD CONSTRAINT fk_booking
+FOREIGN KEY (booking_id)
+REFERENCES booking(booking_id)
+ON DELETE SET NULL;
+
 ALTER TABLE booking
   ADD CHECK (total_price > 0),
   ADD CHECK (status IN ('PENDING', 'CONFIRMED', 'CANCELLED', 'CHECKED_IN', 'COMPLETED'));
@@ -386,50 +392,7 @@ Bibliotekami które użyliśmy do utworzenia projektu są:
 - Spring Boot DevTools
 - Lombok
 
-### 4.1. Struktura plików źródłowych
-
-Ze względu na liczbę oraz rozmiar każdego pliku, w sprawozdaniu omówimy tylko strukturę oraz któtko opiszemy co jest czym w projekcie. Pliki programu są skategoryzowane na 7 pakietów.
-
-#### 4.1.1. domain
-
-Klasy w tym katalogu to encje z każdej tabeli oraz enum `BookingStatus`.
-
-```java
-public enum BookingStatus {
-    PENDING,
-    CONFIRMED,
-    CANCELLED,
-    CHECKED_IN,
-    COMPLETED
-}
-```
-
-Każda klasa wygląda bardzo podobnie. Tutaj przykład, początek klasy `Guest`:
-
-```java
-@Data
-@NoArgsConstructor
-@Entity
-@Table(name = "guest")
-@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
-public class Guest {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "guest_id")
-    private Integer id;
-
-    @NotBlank
-    @Size(max = 50)
-    @Column(name = "first_name", nullable = false, length = 50)
-    private String firstName;
-    
-    /* Dalszy kod... */
-}
-```
-
-#### 4.1.2. dto
-
-Obiekty w tym katalogu to rekordy 
+### 4.1. Operacje na bazie danych
 
 
 ## 6. Możliwości technologii wykorzystanych w projekcie

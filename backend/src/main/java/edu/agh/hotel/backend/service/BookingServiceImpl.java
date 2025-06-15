@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -130,5 +131,16 @@ public class BookingServiceImpl implements BookingService {
         Booking updated = bookingRepo.save(booking);
         log.info("Booking {} status changed to {}", id, status);
         return updated;
+    }
+
+    @Transactional
+    @Override
+    public void delete(Integer id) {
+        List<BookingRoom> bookingRooms = bookingRoomRepo.findAllByBooking_Id(id);
+        bookingRoomRepo.deleteAll(bookingRooms);
+        Booking booking = bookingRepo.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Booking " + id + " not found"));
+        bookingRepo.delete(booking);
+        log.info("Deleted Booking {}", id);
     }
 }

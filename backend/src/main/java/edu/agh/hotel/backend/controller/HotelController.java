@@ -53,12 +53,12 @@ public class HotelController {
      */
     @GetMapping("/{id}/occupancy")
     public List<Booking> getOccupancy(
-            @PathVariable Long id,
+            @PathVariable Long hotelId,
             @RequestParam
             @DateTimeFormat(iso = DATE)
             LocalDate date
     ) {
-        return service.listOccupancy(id, date);
+        return service.listOccupancy(hotelId, date);
     }
 
     /**
