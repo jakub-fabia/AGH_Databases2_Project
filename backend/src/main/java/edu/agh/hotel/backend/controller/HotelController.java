@@ -2,7 +2,7 @@ package edu.agh.hotel.backend.controller;
 
 import edu.agh.hotel.backend.domain.Booking;
 import edu.agh.hotel.backend.domain.Hotel;
-import edu.agh.hotel.backend.dto.SuccessResponse;
+import edu.agh.hotel.backend.SuccessResponse;
 import edu.agh.hotel.backend.dto.hotel.HotelCreateRequest;
 import edu.agh.hotel.backend.dto.hotel.HotelUpdateRequest;
 import edu.agh.hotel.backend.service.HotelService;
@@ -30,8 +30,11 @@ public class HotelController {
 
     private final HotelService service;
 
-    /* ── LIST ─────────────────────────────────────────────────────── */
-
+    /**
+     GET: /api/hotels/{id}
+     * id - required
+     Zebranie danych hotelu o podanym id.
+     */
     @GetMapping
     public Page<Hotel> list(
             @RequestParam(required = false) String city,
@@ -42,19 +45,30 @@ public class HotelController {
         return service.list(country, city, name, stars, pageable);
     }
 
-    @GetMapping("/{hotelId}/occupancy")
+    /**
+     GET: /api/hotels/{id}/occupancy?date={}
+     * id - required
+     * date - required
+     Zbiera dane o rezerwacjach (i zarezerwowanych pokojach) w danym dniu i danym hotelu.
+     */
+    @GetMapping("/{id}/occupancy")
     public List<Booking> getOccupancy(
             @PathVariable Long hotelId,
             @RequestParam
             @DateTimeFormat(iso = DATE)
-            @FutureOrPresent(message = "date must be today or in the future")
             LocalDate date
     ) {
         return service.listOccupancy(hotelId, date);
     }
 
-    /* ── COUNT AVAILABLE ROOMS ────────────────────────────────────── */
-
+    /**
+     GET: /api/hotels/{id}/available?checkin={}&checkout={}&roomTypeId={}
+     * id - required
+     * checkin - optional
+     * checkout - optional
+     * roomTypeId - optional
+     Zwraca ilość dostępnych pokojów w danych hotelu, między datami zameldowania i wymeldowania. Opcjonalnie danego typu.
+     */
     @GetMapping("/{id}/available")
     public long count(
             @PathVariable Long id,
@@ -67,32 +81,44 @@ public class HotelController {
         return service.countAvailableRooms(id, roomTypeId, checkin, checkout);
     }
 
-
-    /* ── GET ONE ──────────────────────────────────────────────────── */
-
+    /**
+     GET: /api/hotels/{id}
+     * id - required
+     Zwraca szczegóły hotelu o danym id.
+     */
     @GetMapping("/{id}")
     public Hotel get(@PathVariable Long id) {
         return service.get(id);
     }
 
-    /* ── CREATE ───────────────────────────────────────────────────── */
-
+    /**
+     POST: /api/hotels
+     * body: HotelCreateRequest JSON - required
+     Tworzy hotel.
+     */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Hotel create(@Valid @RequestBody HotelCreateRequest body) {
         return service.create(body);
     }
 
-    /* ── UPDATE (PUT) ────────────────────────────────────────── */
-
+    /**
+     PUT: /api/hotels/{id}
+     * id - required
+     * body: HotelUpdateRequest
+     Aktualizuje szczegóły hotelu o podanym id.
+     */
     @PutMapping("/{id}")
     public Hotel update(@PathVariable Long id,
                            @Valid @RequestBody HotelUpdateRequest body) {
         return service.update(id, body);
     }
 
-    /* ── DELETE ───────────────────────────────────────────────────── */
-
+    /**
+     DELETE: /api/hotels/{id}
+     * id - required
+     Usuwa hotel o podanym id.
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<SuccessResponse> delete(@PathVariable Long id) {
         service.delete(id);

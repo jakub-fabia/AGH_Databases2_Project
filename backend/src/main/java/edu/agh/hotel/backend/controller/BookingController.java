@@ -20,7 +20,9 @@ public class BookingController {
     private final BookingService bookingService;
 
     /**
-     * Retrieve a booking by its ID.
+     GET: /api/bookings/{id}
+     * id - required
+     Zebranie szczegółów zamówienia o danym id.
      */
     @GetMapping("/{id}")
     public Booking get(@PathVariable Integer id) {
@@ -28,7 +30,9 @@ public class BookingController {
     }
 
     /**
-     * Create a new booking (with its bookingRooms).
+     POST: /api/bookings
+     * Body: BookingCreateRequest JSON - required
+     Dodanie nowego zamówienia.
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -37,7 +41,10 @@ public class BookingController {
     }
 
     /**
-     * Full update of an existing booking, including replacing bookingRooms.
+     PUT: /api/bookings/{id}
+     * id - required
+     * Body: BookingUpdateRequest JSON - required
+     Edycja zamówienia o danym id.
      */
     @PutMapping("/{id}")
     public Booking update(
@@ -48,7 +55,10 @@ public class BookingController {
     }
 
     /**
-     * Change only the status of a booking.
+     PATCH: /api/bookings/{id}?status={status}
+     * id - required
+     * status: BookingStatus - required
+     Zmiana statusu zamówienia.
      */
     @PatchMapping("/{id}")
     public Booking changeStatus(

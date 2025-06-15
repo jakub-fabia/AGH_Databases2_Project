@@ -26,6 +26,13 @@ public class RoomController {
 
     private final RoomService roomService;
 
+    /**
+     GET /api/rooms?checkin={}&checkout={}&roomTypeId={}&minCapacity={}&minPrice={}&maxPrice={}&hotelCountry={}&hotelCity={}&hotelName={}&hotelStars={}
+     * checkin - required
+     * checkout - required
+     * roomTypeId, minCapacity, minPrice, maxPrice, hotelCountry, hotelCity, hotelName, hotelStars - optional
+     Wyszukiwanie dostępnych pokoi w przedziale dat z możliwością filtrowania.
+     */
     @GetMapping
     public Page<Room> list(
             @RequestParam
@@ -47,10 +54,10 @@ public class RoomController {
             @RequestParam(required = false) Integer hotelStars,
             Pageable pageable
     ) {
-        if (checkin != null && checkout != null && !checkin.isBefore(checkout)) {
+        if (!checkin.isBefore(checkout)) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "checkin date must be before checkout date"
+                    "checkout date must be at least one day after checkin"
             );
         }
         return roomService.list(
@@ -63,6 +70,13 @@ public class RoomController {
         );
     }
 
+    /**
+     GET /api/rooms/{id}/available?checkin={}&checkout={}
+     * id - required
+     * checkin - required
+     * checkout - required
+     Sprawdzenie czy dany pokój jest dostępny w przedziale dat.
+     */
     @GetMapping("/{id}/available")
     public boolean isAvailable(
             @PathVariable Long id,
@@ -75,25 +89,39 @@ public class RoomController {
         if (!checkin.isBefore(checkout)) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "checkin date must be before checkout date"
+                    "checkout date must be at least one day after checkin"
             );
         }
         return roomService.isAvailable(id, checkin, checkout);
     }
 
+    /**
+     GET /api/rooms/{id}
+     * id - required
+     Zebranie szczegółów o pokoju.
+     */
     @GetMapping("/{id}")
     public Room get(@PathVariable Long id) {
         return roomService.get(id);
     }
 
-
+    /**
+     POST: /api/rooms
+     * body: RoomCreateRequest JSON - required
+     Stworzenie nowego pokoju.
+     */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Room create(@RequestBody @Valid RoomCreateRequest request) {
         return roomService.create(request);
     }
 
-
+    /**
+     PUT: /api/rooms/{id}
+     * id - required
+     * body: RoomUpdateRequest JSON - required
+     Aktualizacja szczegółów pokoju.
+     */
     @PutMapping("/{id}")
     public Room update(
             @PathVariable Long id,

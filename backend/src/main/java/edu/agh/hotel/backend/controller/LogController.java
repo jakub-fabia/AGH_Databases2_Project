@@ -32,11 +32,11 @@ public class LogController {
     private final RoomLogRepository roomLogRepo;
 
     /**
-     * GET /api/logs/bookings
-     *
-     * @param bookingId optional booking ID to filter
-     * @param from      optional ISO-8601 instant (e.g. 2025-06-13T00:00:00Z)
-     * @param to        optional ISO-8601 instant
+     GET /api/logs/bookings?bookingId={}&from={}&to={}
+     * bookingId - optional
+     * from - optional
+     * to - optional
+     Zebranie logów zamówień, opcjonalnie przefiltrowanych.
      */
     @GetMapping("/bookings")
     public Page<BookingLog> getBookingLogs(
@@ -55,11 +55,11 @@ public class LogController {
     }
 
     /**
-     * GET /api/logs/rooms
-     *
-     * @param roomId optional room ID to filter
-     * @param from   optional ISO-8601 instant
-     * @param to     optional ISO-8601 instant
+     * GET /api/logs/rooms?roomId={}&from={}&to={}
+     * roomId - optional
+     * from - optional
+     * to - optional
+     Zebranie logów pokoi, opcjonalnie przefiltrowanych.
      */
     @GetMapping("/rooms")
     public Page<RoomLog> getRoomLogs(
