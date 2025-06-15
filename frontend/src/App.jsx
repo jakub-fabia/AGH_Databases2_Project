@@ -1,25 +1,24 @@
-import { useState } from 'react'
-import './App.css'
+import { useEffect, useState } from 'react'
 
 function App() {
-  const [count, setCount] = useState(0)
+    const [hotels, setHotels] = useState([])
 
-  return (
-    <>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    useEffect(() => {
+        fetch('http://localhost:8080/api/hotels/1')
+            .then(res => res.json())
+            .then(setHotels)
+    }, [])
+
+    return (
+        <div>
+            <h1>Lista hoteli</h1>
+            <ul>
+                {hotels.map(h => (
+                    <li key={h.id}>{h.name}</li>
+                ))}
+            </ul>
+        </div>
+    )
 }
 
 export default App
