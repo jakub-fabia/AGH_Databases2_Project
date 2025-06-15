@@ -22,6 +22,12 @@ ALTER TABLE booking
   ADD CHECK (total_price > 0),
   ADD CHECK (status IN ('PENDING', 'CONFIRMED', 'CANCELLED', 'CHECKED_IN', 'COMPLETED'));
 
+ALTER TABLE booking_log
+ADD CONSTRAINT fk_booking
+FOREIGN KEY (booking_id)
+REFERENCES booking(booking_id)
+ON DELETE SET NULL;
+
 ALTER TABLE booking_room
   ADD CHECK (checkout_date > checkin_date);
 

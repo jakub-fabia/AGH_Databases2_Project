@@ -13,4 +13,6 @@ public interface BookingService {
     Booking update(Integer id, BookingUpdateRequest request);
 
     Booking changeStatus(Integer id, BookingStatus status);
+
+    void delete(Integer id);
 }

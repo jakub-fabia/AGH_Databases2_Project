@@ -67,4 +67,14 @@ public class BookingController {
     ) {
         return bookingService.changeStatus(id, status);
     }
+
+    /**
+     DELETE: /api/bookings/{id}
+     * id - required
+     Usunięcie zamówienia i wszystkich szczegółów o danym id.
+     */
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Integer id) {
+        bookingService.delete(id);
+    }
 }

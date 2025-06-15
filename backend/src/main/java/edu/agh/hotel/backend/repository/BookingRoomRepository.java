@@ -7,6 +7,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface BookingRoomRepository extends JpaRepository<BookingRoom, Integer> {
+    List<BookingRoom> findAllByBooking_Id(Integer bookingId);
+
     boolean existsByRoom_IdAndCheckinDateLessThanAndCheckoutDateGreaterThan(
             Integer roomId,
             LocalDate desiredCheckout,
