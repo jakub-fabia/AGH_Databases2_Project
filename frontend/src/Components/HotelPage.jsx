@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import {Link, Route, useParams} from "react-router-dom";
 
 function HotelPage() {
     const { id } = useParams();
@@ -169,12 +169,9 @@ function HotelPage() {
                             <h3 className="font-semibold mb-2">✅ Dostępne pokoje:</h3>
                             <ul className="space-y-2">
                                 {availableRooms.map(room => (
-                                    <li key={room.id} className="border p-3 rounded shadow">
-                                        <p><strong>Numer pokoju:</strong> {room.roomNumber}</p>
-                                        <p><strong>Typ:</strong> {room.roomType?.name}</p>
-                                        <p><strong>Pojemność:</strong> {room.capacity} os.</p>
-                                        <p><strong>Cena:</strong> {room.pricePerNight} zł / noc</p>
-                                    </li>
+                                    <Link to={`/rooms/${room.id}`} className="text-blue-600 hover:underline">
+                                        Pokój {room.id} - {room.name}
+                                    </Link>
                                 ))}
                             </ul>
                         </div>
