@@ -5,7 +5,6 @@ import edu.agh.hotel.backend.dto.room.RoomCreateRequest;
 import edu.agh.hotel.backend.dto.room.RoomUpdateRequest;
 import edu.agh.hotel.backend.service.RoomService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.FutureOrPresent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -37,12 +36,9 @@ public class RoomController {
     public Page<Room> list(
             @RequestParam
             @DateTimeFormat(iso = DATE)
-            @FutureOrPresent(message = "checkin must be today or in the future")
             LocalDate checkin,
-
             @RequestParam
             @DateTimeFormat(iso = DATE)
-            @FutureOrPresent(message = "checkout must be today or in the future")
             LocalDate checkout,
             @RequestParam(required = false) Integer roomTypeId,
             @RequestParam(required = false) Short minCapacity,
@@ -54,6 +50,15 @@ public class RoomController {
             @RequestParam(required = false) Integer hotelStars,
             Pageable pageable
     ) {
+        if (checkin.isBefore(LocalDate.now()) || checkin.isEqual(LocalDate.now())) {
+            throw new IllegalArgumentException("Check-in date must be today or in the future. Check-out in the future");
+        }
+        if (!checkin.isBefore(checkout)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "checkout date must be at least one day after checkin"
+            );
+        }
         return roomService.list(
                 checkin, checkout,
                 roomTypeId, minCapacity,
@@ -75,11 +80,14 @@ public class RoomController {
     public boolean isAvailable(
             @PathVariable Long id,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-            @FutureOrPresent LocalDate checkin,
+            LocalDate checkin,
 
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-            @FutureOrPresent LocalDate checkout
+            LocalDate checkout
     ) {
+        if (checkin.isBefore(LocalDate.now()) || checkin.isEqual(LocalDate.now())) {
+            throw new IllegalArgumentException("Check-in date must be today or in the future. Check-out in the future");
+        }
         if (!checkin.isBefore(checkout)) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
