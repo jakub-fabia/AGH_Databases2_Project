@@ -121,7 +121,7 @@ Kompletne definicje SQL znajdują się w pliku [`raport/sql/tables.sql`](./sql
 
 ### 1.7 Tabela `booking_room`
 
-> Szczegóły rezerwacji — które pokoje wchodzą w skład jednego `booking` i z jakimi dodatkami.
+> Szczegóły rezerwacji — które pokoje wchodzą w skład jednego `booking`.
 
 | Kolumna          | Typ                  | Klucz / ograniczenia          | Znaczenie                |
 | ---------------- | -------------------- | ----------------------------- | ------------------------ |
@@ -412,11 +412,11 @@ W dokumentacji, gdy mowa o `...Repository`, chodzi o użycie klas z pakietu `rep
 
 * `JpaRepository` z biblioteki **Spring Data JPA** – znacznie upraszcza tworzenie zapytań do jednej tabeli,
 * `JpaSpecificationExecutor` z tej samej biblioteki – umożliwia tworzenie dynamicznych filtrów zapytań,
-* `@Query` – stosowane, gdy wymagane jest ręczne zdefiniowanie zapytania SQL (każda taka metoda zostanie opisana przy odpowiednim endpointzie).
+* `@Query` – stosowane, gdy wymagane jest ręczne zdefiniowanie zapytania SQL (każda taka metoda zostanie opisana przy odpowiednim endpoincie).
 
 Do tworzenia i aktualizacji encji użyto uproszczonych obiektów z pakietu `dto` (Data Transfer Object). Zawierają one tylko niezbędne atrybuty. Znajduje się tam również uproszczona wersja klasy `Guest` wykorzystywana w odpowiedziach.
 
-Obiekty odpowiadające encjom (czyli klasom reprezentującym tabele w bazie danych) znajdują się w pakiecie `domain`.
+Obiekty odpowiadające instancjom encjom (odwzorowujące strukturę tabeli bazy danych) znajdują się w pakiecie `domain`.
 
 Krótki opis działania endpointów, wraz z wymaganymi i opcjonalnymi polami, znajduje się przy metodach w pakiecie `controller`.
 
@@ -519,6 +519,19 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolation(ConstraintViolationException ex) {
+        String message = ex.getConstraintViolations().stream()
+                .map(cv -> cv.getPropertyPath() + ": " + cv.getMessage())
+                .collect(Collectors.joining(", "));
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                message,
+                Instant.now()
+        );
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> handleDataIntegrity(DataIntegrityViolationException ex) {
         String raw = ex.getMostSpecificCause().getMessage();
@@ -540,11 +553,21 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getMessage(),
+                Instant.now()
+        );
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleAll(Exception ex) {
         ErrorResponse error = new ErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "Wystąpił nieoczekiwany błąd",
+                "An unexpected error occurred",
                 Instant.now()
         );
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -1478,7 +1501,7 @@ Ta pojedyncza klauzula zapewnia, że dla danego `room_id` dwa przedziały dat ni
 Projekt korzysta z adnotacji `@Getter`, `@Setter`, `@Builder`, `@Data` i kilku innych, zdefiniowanych w zależnościach `Lombok`. Efekt to:
 
 * dziesiątki klas encji i DTO bez ręcznego pisania getterów/setterów,
-* obiekty testowe budowane eleganckim „builderem”.
+* szybsze tworzenie konstruktorów obiektów.
 
 ---
 
@@ -1505,22 +1528,19 @@ Wszystkie operacje zapisane są w kolekcjach Postmana. Kolekcje pozwalają przet
 
 ### 6.7 Jakarta Bean Validation — walidacja deklaratywna
 
-Adnotacje takie jak `@NotBlank`, `@Email`, `@Past` są umieszczone bezpośrednio w klasach requestów; Spring wywołuje walidator automatycznie przy `@Valid`. Błędy trafiają do globalnego handlera i wracają w jednolitym formacie JSON, więc front-end dostaje zawsze tę samą strukturę komunikatu.
+Adnotacje takie jak `@NotBlank`, `@Email`, `@Past` są umieszczone bezpośrednio w klasach requestów; Spring wywołuje walidator automatycznie przy `@Valid`. Błędy trafiają do globalnego handlera i wracają w jednolitym formacie JSON, więc front-end dostaje zawsze podobną strukturę komunikatu.
 
 ---
 
-### 6.8 MapStruct — typu-bezpieczne mapowanie DTO ↔ encje
+### 6.8 MapStruct — mapowanie type-safe DTO ↔ encje
 
-W opisie każdego endpointu CREATE lub PUT pojawia się krok „Konwersja DTO na encję (mapper)”. Za generację tych mapperów odpowiada MapStruct, co daje:
-
-* zero ręcznego „kopiuj pól”,
-* compile-time sprawdzenie zgodności typów.
+W opisie każdego endpointu CREATE lub PUT pojawia się krok „Konwersja DTO na encję (mapper)”. Za generowanie tych mapperów odpowiada MapStruct, co daje:
+* brak potrzeby ręcznego przepisywania pól,
+* automatyczne sprawdzenie zgodności typów.
 
 ---
 
-## 7. Dodatkowe technologie wykorzystane w projekcie
-
-### 7.1 Konteneryzacja przy pomocy Dockera
+## 7. Dodatkowe technologie wykorzystane w projekcie - Docker
 
 Całe środowisko uruchomieniowe zostało rozłożone na trzy odrębne obrazy:
 
@@ -1528,10 +1548,3 @@ Całe środowisko uruchomieniowe zostało rozłożone na trzy odrębne obrazy:
 * **frontend (React JS)** – drugi kontener bazujący na `Node LTS`; w fazie budowania powstaje statyczny bundle, a w fazie uruchomienia serwuje go serwer `Nginx`.
 * **baza danych (PostgreSQL)** – trzeci kontener oparty na obrazie `postgres:latest`, z dołączonym wolumenem na dane.
 
----
-
-### 7.2 Frontend zbudowany w React JS
-
-Warstwa prezentacji powstała w oparciu o **React** z wykorzystaniem:
-
-# Tutaj biblioteki na frontendzie

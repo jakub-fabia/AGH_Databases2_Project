@@ -8,7 +8,6 @@ import edu.agh.hotel.backend.dto.hotel.HotelCreateRequest;
 import edu.agh.hotel.backend.dto.hotel.HotelUpdateRequest;
 import edu.agh.hotel.backend.service.HotelService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.FutureOrPresent;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -88,9 +87,9 @@ public class HotelController {
     public Page<Room> count(
             @PathVariable Long id,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-            @FutureOrPresent LocalDate checkin,
+            LocalDate checkin,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-            @FutureOrPresent LocalDate checkout,
+            LocalDate checkout,
             @RequestParam(required = false) Integer roomTypeId,
             @RequestParam(required = false) Short minCapacity,
             @RequestParam(required = false) BigDecimal minPrice,
@@ -98,6 +97,12 @@ public class HotelController {
             @ParameterObject Pageable pageable
 
     ) {
+        if (checkin.isBefore(LocalDate.now()) || checkin.isEqual(LocalDate.now())) {
+            throw new IllegalArgumentException("Check-in date must be today or in the future. Check-out in the future");
+        }
+        if (!checkin.isBefore(checkout)) {
+            throw new IllegalArgumentException("Checkout date must be at least one day after check-in date");
+        }
         return service.availableRooms(checkin,checkout,roomTypeId,minCapacity,minPrice,maxPrice,id,pageable);
     }
 
