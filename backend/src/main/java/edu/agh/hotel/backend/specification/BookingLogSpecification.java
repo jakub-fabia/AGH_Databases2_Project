@@ -5,7 +5,7 @@ import edu.agh.hotel.backend.domain.BookingStatus;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,8 +13,8 @@ public class BookingLogSpecification {
 
     public static Specification<BookingLog> filterBy(
             Integer bookingId,
-            Instant from,
-            Instant to,
+            LocalDateTime from,
+            LocalDateTime to,
             BookingStatus status
     ) {
         return (root, query, cb) -> {

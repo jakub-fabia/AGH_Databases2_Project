@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 import static org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME;
 
@@ -42,9 +42,9 @@ public class LogController {
     public Page<BookingLog> getBookingLogs(
             @RequestParam(required = false) Integer bookingId,
             @RequestParam(required = false)
-            @DateTimeFormat(iso = DATE_TIME) Instant from,
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
             @RequestParam(required = false)
-            @DateTimeFormat(iso = DATE_TIME) Instant to,
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to,
             @RequestParam(required = false) BookingStatus status,
             Pageable pageable
     ) {
@@ -65,9 +65,9 @@ public class LogController {
     public Page<RoomLog> getRoomLogs(
             @RequestParam(required = false) Integer roomId,
             @RequestParam(required = false)
-            @DateTimeFormat(iso = DATE_TIME) Instant from,
+            @DateTimeFormat(iso = DATE_TIME) LocalDateTime from,
             @RequestParam(required = false)
-            @DateTimeFormat(iso = DATE_TIME) Instant to,
+            @DateTimeFormat(iso = DATE_TIME) LocalDateTime to,
             Pageable pageable
     ) {
         return roomLogRepo.findAll(

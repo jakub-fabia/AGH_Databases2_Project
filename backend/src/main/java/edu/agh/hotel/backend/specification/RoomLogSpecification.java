@@ -4,7 +4,7 @@ import edu.agh.hotel.backend.domain.RoomLog;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,8 +12,8 @@ public class RoomLogSpecification {
 
     public static Specification<RoomLog> filterBy(
             Integer roomId,
-            Instant from,
-            Instant to
+            LocalDateTime from,
+            LocalDateTime to
     ) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
