@@ -1,7 +1,7 @@
 spring:
   datasource:
-    url: jdbc:postgresql://db:5432/booking
-    # url: jdbc:postgresql://localhost:5432/booking
+#    url: jdbc:postgresql://db:5432/booking
+    url: jdbc:postgresql://localhost:5432/booking
     username: hotel_app
     password: secret
     driver-class-name: org.postgresql.Driver

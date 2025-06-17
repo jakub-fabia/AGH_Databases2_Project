@@ -96,6 +96,10 @@ public class HotelServiceImpl implements HotelService {
     @Override
     public Hotel create(HotelCreateRequest req) {
         Hotel entity = mapper.toEntity(req);
+        if (entity.getCheckinTime().isBefore(entity.getCheckoutTime())) {
+            throw new IllegalArgumentException("Check-in time must be before check-out time");
+        }
+        
         Hotel saved  = repo.save(entity);
         log.info("Created Hotel {}", saved.getId());
         return saved;
