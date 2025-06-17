@@ -52,6 +52,9 @@ public class GuestServiceImpl implements GuestService {
     @Transactional
     @Override
     public Guest create(GuestCreateRequest req) {
+        if(req.email() == null && req.phone() == null) {
+            throw new IllegalArgumentException("Email or phone must be provided");
+        }
         Guest entity = mapper.toEntity(req);
         Guest saved = repo.save(entity);
         log.info("Created Guest {}", saved.getId());
@@ -61,6 +64,9 @@ public class GuestServiceImpl implements GuestService {
     @Transactional
     @Override
     public Guest update(Integer id, GuestUpdateRequest req) {
+        if(req.email() == null && req.phone() == null) {
+            throw new IllegalArgumentException("Email or phone must be provided");
+        }
         Guest entity = repo.findById(id)
                 .orElseThrow(() -> notFound(id));
         mapper.updateEntityFromDto(req, entity);
