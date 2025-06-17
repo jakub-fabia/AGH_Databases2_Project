@@ -13,7 +13,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/api/logs/bookings?status=CONFIRMED",
+					"raw": "http://localhost:8080/api/logs/bookings?status=CONFIRMED&from=2025-06-16T00:00:00&to=2025-06-17T21:00:00",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -31,18 +31,16 @@
 						},
 						{
 							"key": "bookingId",
-							"value": null,
+							"value": "",
 							"disabled": true
 						},
 						{
 							"key": "from",
-							"value": null,
-							"disabled": true
+							"value": "2025-06-16T00:00:00"
 						},
 						{
 							"key": "to",
-							"value": null,
-							"disabled": true
+							"value": "2025-06-17T21:00:00"
 						}
 					]
 				}
@@ -55,7 +53,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/api/logs/rooms?roomId=1",
+					"raw": "http://localhost:8080/api/logs/rooms?roomId=1&from=2025-06-16T00:00:00&to=2025-06-17T21:00:00",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -68,18 +66,16 @@
 					],
 					"query": [
 						{
+							"key": "roomId",
+							"value": "1"
+						},
+						{
 							"key": "from",
-							"value": "",
-							"disabled": true
+							"value": "2025-06-16T00:00:00"
 						},
 						{
 							"key": "to",
-							"value": "",
-							"disabled": true
-						},
-						{
-							"key": "roomId",
-							"value": "1"
+							"value": "2025-06-17T21:00:00"
 						}
 					]
 				}

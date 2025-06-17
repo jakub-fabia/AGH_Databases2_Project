@@ -42,7 +42,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"guestId\": \"3\",\r\n    \"hotelId\": \"1\",\r\n    \"status\": \"PENDING\",\r\n    \"bookingRooms\": [\r\n        {\r\n            \"roomId\": \"1\",\r\n            \"checkinDate\": \"2025-07-09\",\r\n            \"checkoutDate\": \"2025-07-11\"\r\n        },\r\n        {\r\n            \"roomId\": \"2\",\r\n            \"checkinDate\": \"2025-07-09\",\r\n            \"checkoutDate\": \"2025-07-11\"\r\n        },\r\n                {\r\n            \"roomId\": \"3\",\r\n            \"checkinDate\": \"2025-07-09\",\r\n            \"checkoutDate\": \"2025-07-11\"\r\n        },\r\n                {\r\n            \"roomId\": \"4\",\r\n            \"checkinDate\": \"2025-07-09\",\r\n            \"checkoutDate\": \"2025-07-11\"\r\n        }\r\n    ]\r\n}",
+					"raw": "{\r\n    \"guestId\": \"3\",\r\n    \"hotelId\": \"1\",\r\n    \"status\": \"PENDING\",\r\n    \"bookingRooms\": [\r\n        {\r\n            \"roomId\": \"1\",\r\n            \"checkinDate\": \"2025-09-13\",\r\n            \"checkoutDate\": \"2025-09-14\"\r\n        }\r\n    ]\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -71,7 +71,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"status\": \"PENDING\",\r\n    \"bookingRooms\": [\r\n        {\r\n            \"roomId\": \"1\",\r\n            \"checkinDate\": \"2025-07-17\",\r\n            \"checkoutDate\": \"2025-07-20\"\r\n        }\r\n    ]\r\n}",
+					"raw": "{\r\n    \"status\": \"PENDING\",\r\n    \"bookingRooms\": [\r\n        {\r\n            \"roomId\": \"1\",\r\n            \"checkinDate\": \"2025-09-13\",\r\n            \"checkoutDate\": \"2025-09-02\"\r\n        }\r\n    ]\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -126,10 +126,6 @@
 			"request": {
 				"method": "DELETE",
 				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"hotelId\": \"1\",\r\n    \"roomTypeId\": \"1\",\r\n    \"roomNumber\": \"111a\",\r\n    \"capacity\": \"3\",\r\n    \"pricePerNight\": \"50\"\r\n}"
-				},
 				"url": {
 					"raw": "http://localhost:8080/api/bookings/{{id}}",
 					"protocol": "http",

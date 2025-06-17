@@ -54,7 +54,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/api/hotels/{{id}}?checkin={}&checkout={}&roomTypeId={}&minCapacity={}&minPrice={}&maxPrice={}",
+					"raw": "http://localhost:8080/api/hotels/{{id}}/available?checkin=2025-05-11&checkout=2025-06-09",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -63,32 +63,37 @@
 					"path": [
 						"api",
 						"hotels",
-						"{{id}}"
+						"{{id}}",
+						"available"
 					],
 					"query": [
 						{
 							"key": "checkin",
-							"value": "{}"
+							"value": "2025-05-11"
 						},
 						{
 							"key": "checkout",
-							"value": "{}"
+							"value": "2025-06-09"
 						},
 						{
 							"key": "roomTypeId",
-							"value": "{}"
+							"value": "{}",
+							"disabled": true
 						},
 						{
 							"key": "minCapacity",
-							"value": "{}"
+							"value": "{}",
+							"disabled": true
 						},
 						{
 							"key": "minPrice",
-							"value": "{}"
+							"value": "{}",
+							"disabled": true
 						},
 						{
 							"key": "maxPrice",
-							"value": "{}"
+							"value": "{}",
+							"disabled": true
 						}
 					]
 				}
@@ -172,7 +177,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n  \"name\": \"Hoteal1\",\r\n  \"country\": \"Polska\",\r\n  \"city\": \"Warszawa\",\r\n  \"address\": \"Kawiory 12\",\r\n  \"phone\": \"12411323\",\r\n  \"checkinTime\": \"13:00\",\r\n  \"checkoutTime\": \"10:00\"\r\n}",
+					"raw": "{\r\n  \"name\": \"Hoteal1\",\r\n  \"country\": \"Polska\",\r\n  \"city\": \"Warszawa\",\r\n  \"address\": \"Kawiory 12\",\r\n  \"phone\": \"12411323\",\r\n  \"checkinTime\": \"13:00\",\r\n  \"checkoutTime\": \"12:00\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -201,7 +206,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n  \"name\": \"Hoteal1\",\r\n  \"country\": \"Polska\",\r\n  \"city\": \"Warszawa\",\r\n  \"address\": \"Kawiory 12\",\r\n  \"phone\": \"12411323\",\r\n  \"checkinTime\": \"13:00\",\r\n  \"checkoutTime\": \"10:00\",\r\n  \"stars\": 3\r\n}",
+					"raw": "{\r\n  \"name\": \"Hoteal1\",\r\n  \"country\": \"Polska\",\r\n  \"city\": \"Warszawa\",\r\n  \"address\": \"Kawiory 12\",\r\n  \"phone\": \"12411323\",\r\n  \"checkinTime\": \"11:00\",\r\n  \"checkoutTime\": \"12:00\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
