@@ -27,6 +27,7 @@ public class BookingServiceImpl implements BookingService {
     private final HotelRepository hotelRepo;
     private final RoomRepository roomRepo;
     private final BookingMapper bookingMapper;
+    private final BookingLogRepository bookingLogRepo;
 
     @Transactional(readOnly = true)
     @Override
@@ -140,6 +141,8 @@ public class BookingServiceImpl implements BookingService {
         bookingRoomRepo.deleteAll(bookingRooms);
         Booking booking = bookingRepo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Booking " + id + " not found"));
+        List<BookingLog> bookingLog = bookingLogRepo.findAllByBooking_Id(id);
+        bookingLogRepo.deleteAll(bookingLog);
         bookingRepo.delete(booking);
         log.info("Deleted Booking {}", id);
     }

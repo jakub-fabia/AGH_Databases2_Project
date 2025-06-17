@@ -54,7 +54,7 @@ CREATE TABLE booking (
 
 CREATE TABLE booking_room (
   booking_room_id SERIAL        PRIMARY KEY,
-  booking_id      INT,
+  booking_id      INT           NOT NULL REFERENCES booking,
   room_id         INT           NOT NULL REFERENCES room,
   checkin_date    DATE          NOT NULL,
   checkout_date   DATE          NOT NULL
