@@ -99,7 +99,6 @@ public class HotelServiceImpl implements HotelService {
         if (entity.getCheckinTime().isBefore(entity.getCheckoutTime())) {
             throw new IllegalArgumentException("Check-in time must be before check-out time");
         }
-        
         Hotel saved  = repo.save(entity);
         log.info("Created Hotel {}", saved.getId());
         return saved;
@@ -108,6 +107,9 @@ public class HotelServiceImpl implements HotelService {
     @Transactional
     @Override
     public Hotel update(Long id, HotelUpdateRequest req) {
+        if (req.checkinTime().isBefore(req.checkoutTime())) {
+            throw new IllegalArgumentException("Check-in time must be before check-out time");
+        }
         Hotel entity = repo.findById(id).orElseThrow(() -> notFound(id));
         mapper.updateEntityFromDto(req, entity);
         return entity;
