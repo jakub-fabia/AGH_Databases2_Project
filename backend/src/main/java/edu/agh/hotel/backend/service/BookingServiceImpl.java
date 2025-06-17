@@ -52,6 +52,9 @@ public class BookingServiceImpl implements BookingService {
         BigDecimal total = BigDecimal.ZERO;
 
         for (var brReq : req.bookingRooms()) {
+            if (brReq.checkinDate().isAfter(brReq.checkoutDate())) {
+                throw new IllegalArgumentException("Check-in date must be before check-out date");
+            }
             Room room = roomRepo.findById(brReq.roomId())
                     .orElseThrow(() -> new EntityNotFoundException("Room " + brReq.roomId() + " not found"));
 
@@ -94,6 +97,9 @@ public class BookingServiceImpl implements BookingService {
             BigDecimal total = BigDecimal.ZERO;
 
             for (var brReq : req.bookingRooms()) {
+                if (brReq.checkinDate().isAfter(brReq.checkoutDate())) {
+                    throw new IllegalArgumentException("Check-in date must be before check-out date");
+                }
                 Room room = roomRepo.findById(brReq.roomId())
                         .orElseThrow(() -> new EntityNotFoundException("Room " + brReq.roomId() + " not found"));
 
